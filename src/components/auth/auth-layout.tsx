@@ -55,11 +55,11 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Right — form panel (theme-aware) */}
-        <div className="flex w-full flex-col bg-surface lg:w-1/2">
+        <main className="flex w-full flex-col bg-surface lg:w-1/2">
           <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-12 sm:px-10">
             {children}
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

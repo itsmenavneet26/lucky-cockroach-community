@@ -50,6 +50,7 @@ export async function SiteHeader({ topics = [] }: { topics?: Topic[] }) {
           <input
             type="search"
             name="q"
+            aria-label="Search posts, topics, and people"
             placeholder="Search posts, topics, people…"
             className="h-11 w-full rounded-full border border-border bg-surface-2 pl-11 pr-4 text-sm text-ink placeholder:text-muted focus:border-accent focus:bg-surface"
           />

@@ -11,8 +11,8 @@ import type {
   Topic,
 } from "@/lib/types";
 
-/** Returns the caller's role, or null if signed out. */
-async function callerRole(): Promise<string | null> {
+/** Returns the caller's role, or null if signed out. Cached per request. */
+const callerRole = cache(async (): Promise<string | null> => {
   const user = await getUser();
   if (!user) return null;
   const supabase = await createClient();
@@ -26,7 +26,7 @@ async function callerRole(): Promise<string | null> {
     return null;
   }
   return data?.role ?? null;
-}
+});
 
 export async function requireStaff(): Promise<"moderator" | "admin" | null> {
   const role = await callerRole();

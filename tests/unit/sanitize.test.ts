@@ -97,7 +97,7 @@ describe("sanitiseTiptapJson", () => {
       ],
     };
     const out = sanitiseTiptapJson(input) as { content: { content: { marks?: unknown[] }[] }[] };
-    expect(out.content[0].content[0].marks[0]).toEqual({
+    expect(out.content[0].content[0].marks?.[0]).toEqual({
       type: "link",
       attrs: { href: "https://example.com", target: "_blank", rel: "noopener nofollow" },
     });

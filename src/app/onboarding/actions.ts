@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { getUser } from "@/lib/auth";
 import { fromZod, mapDbError, type FieldErrors } from "@/lib/errors";
 
 const usernameSchema = z
@@ -17,14 +18,14 @@ const usernameSchema = z
 export async function checkUsername(
   raw: string,
 ): Promise<{ ok: boolean; available?: boolean; error?: string }> {
+  const user = await getUser();
+  if (!user) {
+    return { ok: false, error: "Please sign in to check username availability." };
+  }
   const parsed = usernameSchema.safeParse(raw);
   if (!parsed.success) {
     return { ok: false, error: "3-20 lowercase letters, numbers, underscores." };
   }
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
   const service = createServiceClient();
   const { data, error } = await service
     .from("profiles")

@@ -128,6 +128,7 @@ export function OnboardingForm({
   const [avatar, setAvatar] = useState(defaultAvatar);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [pronouns, setPronouns] = useState("");
   const [stateValue, setStateValue] = useState("");
   const [city, setCity] = useState("");
   const [statusSelected, setStatusSelected] = useState("");
@@ -325,6 +326,21 @@ export function OnboardingForm({
           </div>
         </Field>
       </div>
+
+      {/* Pronouns */}
+      <Field label="Pronouns" hint="Optional — e.g. she/her, he/him, they/them.">
+        <div className="flex h-11 items-center rounded-[var(--radius)] border border-border bg-surface-2 focus-within:border-accent">
+          <UserIcon size={15} className="ml-3 text-muted" />
+          <input
+            name="pronouns"
+            value={pronouns}
+            onChange={(e) => setPronouns(e.target.value)}
+            maxLength={30}
+            placeholder="e.g. she/her"
+            className="h-full w-full bg-transparent px-2 text-sm text-ink outline-none"
+          />
+        </div>
+      </Field>
 
       {/* State + City */}
       <div className="grid gap-4 sm:grid-cols-2">

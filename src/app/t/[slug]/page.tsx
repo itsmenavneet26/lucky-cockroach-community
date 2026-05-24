@@ -51,30 +51,31 @@ export default async function TopicPage({
 }) {
   const { slug } = await params;
   const { sort } = await searchParams;
-  const topic = await getTopic(slug);
+  const [topic, profile] = await Promise.all([getTopic(slug), getProfile()]);
   if (!topic) notFound();
 
   const feed: FeedKey = VALID.includes(sort as FeedKey)
     ? (sort as FeedKey)
     : "hot";
 
-  const profile = await getProfile();
-  let joined = false;
-  if (profile) {
-    const supabase = await createClient();
-    const { data } = await supabase
-      .from("topic_members")
-      .select("id")
-      .eq("user_id", profile.id)
-      .eq("topic_id", topic.id)
-      .maybeSingle();
-    joined = !!data;
-  }
-
-  const posts = await getFeedPosts({
-    topicId: topic.id,
-    sort: feed as "hot" | "rising" | "new",
-  });
+  const [posts, joined] = await Promise.all([
+    getFeedPosts({
+      topicId: topic.id,
+      sort: feed as "hot" | "rising" | "new",
+    }),
+    profile
+      ? createClient()
+          .then((supabase) =>
+            supabase
+              .from("topic_members")
+              .select("id")
+              .eq("user_id", profile.id)
+              .eq("topic_id", topic.id)
+              .maybeSingle(),
+          )
+          .then(({ data }) => !!data)
+      : Promise.resolve(false),
+  ]);
 
   return (
     <AppShell rightSidebar={<RightSidebar />}>

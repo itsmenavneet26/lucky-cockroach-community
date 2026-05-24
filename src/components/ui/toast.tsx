@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { AlertCircle, CheckCircle2, Info, X } from "lucide-react";
@@ -45,17 +46,16 @@ const TONE_CLASSES: Record<Tone, string> = {
   info: "border-accent/30 bg-accent-soft text-ink",
 };
 
-let toastSeq = 0;
-
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const seqRef = useRef(0);
 
   const dismiss = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   const toast = useCallback((t: ToastInput) => {
-    const id = `t${++toastSeq}`;
+    const id = `t${++seqRef.current}`;
     const duration = t.duration ?? (t.tone === "error" ? 5500 : 3500);
     setToasts((prev) => [...prev, { ...t, id, duration }]);
   }, []);

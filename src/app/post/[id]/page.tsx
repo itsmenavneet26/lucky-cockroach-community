@@ -15,6 +15,7 @@ import { PostModBar } from "@/components/moderation/post-mod-bar";
 import { getPost, getPoll, getComments, requireStaff } from "@/lib/queries";
 import { getProfile } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
+import { after } from "next/server";
 import { timeAgo } from "@/lib/utils";
 
 export async function generateMetadata({
@@ -60,23 +61,24 @@ export default async function PostPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const post = await getPost(id);
+  const [post, profile, isStaff] = await Promise.all([
+    getPost(id),
+    getProfile(),
+    requireStaff().then((r) => !!r),
+  ]);
   if (!post) notFound();
-
-  const profile = await getProfile();
-  const isStaff = !!(await requireStaff());
   if (post.is_removed && !isStaff && profile?.id !== post.author_id) notFound();
   const authorName = post.author.display_name || post.author.username;
-
-  // Count the view (fire-and-forget, service client bypasses RLS).
-  createServiceClient()
-    .rpc("increment_post_view", { p_id: post.id })
-    .then(() => {});
 
   const [poll, comments] = await Promise.all([
     post.post_type === "poll" ? getPoll(post.id) : Promise.resolve(null),
     getComments(post.id),
   ]);
+
+  // Count the view after the response is sent so it doesn't delay rendering.
+  after(async () => {
+    await createServiceClient().rpc("increment_post_view", { p_id: post.id });
+  });
 
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
