@@ -52,6 +52,7 @@ export function UserSidebar({ username }: { username: string }) {
   const { profile, account } = buildLinks(username);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCollapsed(localStorage.getItem("lcc-dashboard-sidebar") === "collapsed");
   }, []);
 

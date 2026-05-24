@@ -1,0 +1,215 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: a11y.spec.ts >> a11y: /about has no WCAG 2.2 AA violations
+- Location: tests/e2e/a11y.spec.ts:21:7
+
+# Error details
+
+```
+Test timeout of 30000ms exceeded.
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "Lucky Cockroach Community — home" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - img [ref=e7]
+          - generic [ref=e9]:
+            - generic [ref=e10]: LUCKY
+            - generic [ref=e11]: COCKROACH
+        - generic [ref=e12]:
+          - img
+          - searchbox "Search posts, topics, and people" [ref=e13]
+        - generic [ref=e14]:
+          - link "Create Post" [ref=e15] [cursor=pointer]:
+            - /url: /login
+            - button "Create Post" [ref=e16]:
+              - img [ref=e17]
+              - text: Create Post
+          - button "Switch to dark mode" [ref=e19]:
+            - img [ref=e20]
+          - link "Sign in" [ref=e22] [cursor=pointer]:
+            - /url: /login
+            - button "Sign in" [ref=e23]
+    - generic [ref=e24]:
+      - complementary [ref=e25]:
+        - navigation "Primary" [ref=e27]:
+          - generic [ref=e28]:
+            - generic [ref=e29]: Browse
+            - button "Collapse sidebar" [ref=e30]:
+              - img [ref=e31]
+          - list [ref=e34]:
+            - listitem [ref=e35]:
+              - link "Home" [ref=e36] [cursor=pointer]:
+                - /url: /
+                - img [ref=e37]
+                - generic [ref=e40]: Home
+            - listitem [ref=e41]:
+              - link "Dashboard" [ref=e42] [cursor=pointer]:
+                - /url: /dashboard
+                - img [ref=e43]
+                - generic [ref=e48]: Dashboard
+            - listitem [ref=e49]:
+              - link "Explore" [ref=e50] [cursor=pointer]:
+                - /url: /explore
+                - img [ref=e51]
+                - generic [ref=e54]: Explore
+            - listitem [ref=e55]:
+              - link "Saved" [ref=e56] [cursor=pointer]:
+                - /url: /saved
+                - img [ref=e57]
+                - generic [ref=e59]: Saved
+            - listitem [ref=e60]:
+              - link "Leaderboard" [ref=e61] [cursor=pointer]:
+                - /url: /leaderboard
+                - img [ref=e62]
+                - generic [ref=e68]: Leaderboard
+            - listitem [ref=e69]:
+              - link "Volunteer" [ref=e70] [cursor=pointer]:
+                - /url: /volunteer
+                - img [ref=e71]
+                - generic [ref=e73]: Volunteer
+            - listitem [ref=e74]:
+              - link "Scholarship" [ref=e75] [cursor=pointer]:
+                - /url: /scholarship
+                - img [ref=e76]
+                - generic [ref=e79]: Scholarship
+            - listitem [ref=e80]:
+              - link "Mental health" [ref=e81] [cursor=pointer]:
+                - /url: /mental-health
+                - img [ref=e82]
+                - generic [ref=e85]: Mental health
+          - generic [ref=e86]:
+            - paragraph [ref=e87]: Topics
+            - list [ref=e88]:
+              - listitem [ref=e89]:
+                - link "Paper Leaks & Exam Fraud" [ref=e90] [cursor=pointer]:
+                  - /url: /t/paper-leaks
+                  - img [ref=e91]
+                  - generic [ref=e94]: Paper Leaks & Exam Fraud
+              - listitem [ref=e95]:
+                - link "Recruitment Delays" [ref=e96] [cursor=pointer]:
+                  - /url: /t/recruitment-delays
+                  - img [ref=e97]
+                  - generic [ref=e100]: Recruitment Delays
+              - listitem [ref=e101]:
+                - link "Unemployment" [ref=e102] [cursor=pointer]:
+                  - /url: /t/unemployment
+                  - img [ref=e103]
+                  - generic [ref=e106]: Unemployment
+              - listitem [ref=e107]:
+                - link "Mental Health & Exam Stress" [ref=e108] [cursor=pointer]:
+                  - /url: /t/mental-health
+                  - img [ref=e109]
+                  - generic [ref=e112]: Mental Health & Exam Stress
+              - listitem [ref=e113]:
+                - link "Aspirant Life" [ref=e114] [cursor=pointer]:
+                  - /url: /t/aspirant-life
+                  - img [ref=e115]
+                  - generic [ref=e118]: Aspirant Life
+              - listitem [ref=e119]:
+                - link "Wins & Survival" [ref=e120] [cursor=pointer]:
+                  - /url: /t/wins
+                  - img [ref=e121]
+                  - generic [ref=e124]: Wins & Survival
+              - listitem [ref=e125]:
+                - link "Demands & Action" [ref=e126] [cursor=pointer]:
+                  - /url: /t/demands
+                  - img [ref=e127]
+                  - generic [ref=e130]: Demands & Action
+              - listitem [ref=e131]:
+                - link "Help & Resources" [ref=e132] [cursor=pointer]:
+                  - /url: /t/help
+                  - img [ref=e133]
+                  - generic [ref=e136]: Help & Resources
+          - generic [ref=e137]:
+            - generic [ref=e138]:
+              - img [ref=e139]
+              - img [ref=e141]
+            - paragraph [ref=e143]: Small steps. Big change.
+            - paragraph [ref=e144]: Together, we go further.
+            - link "Invite friends" [ref=e145] [cursor=pointer]:
+              - /url: /explore
+              - img [ref=e146]
+              - text: Invite friends
+      - main [ref=e151]:
+        - article [ref=e152]:
+          - heading "About the community" [level=1] [ref=e153]
+          - generic [ref=e154]:
+            - paragraph [ref=e155]: Lucky Cockroach Community is the member space of the Lucky Cockroach movement — built for India's students, aspirants, and unemployed youth.
+            - paragraph [ref=e156]: "It exists for one thing: so that nobody goes through paper leaks, recruitment delays, exam stress, or the job hunt feeling alone. Share what you're going through, ask honest questions, and stand with people who understand the fight."
+            - paragraph [ref=e157]: This is a support community, not a political space. Be honest, be kind, and look after each other.
+      - complementary [ref=e158]:
+        - generic [ref=e160]:
+          - generic [ref=e161]:
+            - heading "Lucky Cockroach Community" [level=2] [ref=e162]:
+              - text: Lucky Cockroach Community
+              - img [ref=e163]
+            - paragraph [ref=e166]: A space for India's students and youth to share what they're going through — and stand with people who understand.
+            - generic [ref=e167]:
+              - generic [ref=e168]:
+                - definition [ref=e169]: "0"
+                - term [ref=e170]: Members
+              - generic [ref=e171]:
+                - definition [ref=e172]: "0"
+                - term [ref=e173]: Posts
+              - generic [ref=e174]:
+                - definition [ref=e175]: "8"
+                - term [ref=e176]: Topics
+            - link "Share your story" [ref=e177] [cursor=pointer]:
+              - /url: /submit
+          - generic [ref=e178]:
+            - heading "Newest members" [level=2] [ref=e179]:
+              - img [ref=e180]
+              - text: Newest members
+            - list [ref=e183]:
+              - listitem [ref=e184]:
+                - link "L Lucky Rohilla @lucky" [ref=e185] [cursor=pointer]:
+                  - /url: /u/lucky
+                  - generic [ref=e187]: L
+                  - generic [ref=e188]:
+                    - generic [ref=e189]: Lucky Rohilla
+                    - generic [ref=e190]: "@lucky"
+              - listitem [ref=e191]:
+                - link "Navneet Pandey Navneet Pandey @itsmenavneet2662" [ref=e192] [cursor=pointer]:
+                  - /url: /u/itsmenavneet2662
+                  - img "Navneet Pandey" [ref=e194]
+                  - generic [ref=e195]:
+                    - generic [ref=e196]: Navneet Pandey
+                    - generic [ref=e197]: "@itsmenavneet2662"
+              - listitem [ref=e198]:
+                - link "Amazeglam Amazeglam @amazeglam26" [ref=e199] [cursor=pointer]:
+                  - /url: /u/amazeglam26
+                  - img "Amazeglam" [ref=e201]
+                  - generic [ref=e202]:
+                    - generic [ref=e203]: Amazeglam
+                    - generic [ref=e204]: "@amazeglam26"
+              - listitem [ref=e205]:
+                - link "Navneet Pandey Navneet Pandey @navneet" [ref=e206] [cursor=pointer]:
+                  - /url: /u/navneet
+                  - img "Navneet Pandey" [ref=e208]
+                  - generic [ref=e209]:
+                    - generic [ref=e210]: Navneet Pandey
+                    - generic [ref=e211]: "@navneet"
+          - generic [ref=e212]:
+            - heading "Volunteer with us" [level=2] [ref=e213]:
+              - img [ref=e214]
+              - text: Volunteer with us
+            - paragraph [ref=e219]: Have time or a skill to give? Join the groundwork behind the movement.
+            - link "Become a volunteer →" [ref=e220] [cursor=pointer]:
+              - /url: /volunteer
+  - button "Open Next.js Dev Tools" [ref=e226] [cursor=pointer]:
+    - img [ref=e227]
+  - alert [ref=e230]
+```
