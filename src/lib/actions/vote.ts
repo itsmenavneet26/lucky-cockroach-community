@@ -44,6 +44,10 @@ export async function castVote(
     // Foreign-key violation — the post or comment was deleted between render and click.
     if (error.code === "23503")
       return fail("not_found", "That post is no longer available.");
+    // Concurrent toggle race: two rapid clicks both saw "no existing vote"
+    // and both tried INSERT. The unique constraint won; the user's intent
+    // (a vote exists for them on this target) is already satisfied.
+    if (error.code === "23505") return ok();
     return mapDbError("vote.rpc", error);
   }
   return ok();

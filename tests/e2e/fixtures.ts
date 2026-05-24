@@ -12,7 +12,7 @@ import { test as base, expect, type Page } from "@playwright/test";
  * still use the default `page` from "@playwright/test".
  */
 export const test = base.extend<{ signedInPage: Page }>({
-  signedInPage: async ({ browser }, use) => {
+  signedInPage: async ({ browser }, runTest) => {
     const email = process.env.PW_TEST_EMAIL;
     const password = process.env.PW_TEST_PASSWORD;
     if (!email || !password) {
@@ -26,7 +26,7 @@ export const test = base.extend<{ signedInPage: Page }>({
     await page.locator('form button[type="submit"]').first().click();
     // Sign-in should redirect to "/" or to ?next=. Allow either.
     await page.waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 10_000 });
-    await use(page);
+    await runTest(page);
     await ctx.close();
   },
 });
