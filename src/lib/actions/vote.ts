@@ -35,10 +35,15 @@ export async function castVote(
     p_value: value,
   });
   if (error) {
-    if (error.message?.includes("own content"))
+    // Self-vote guard — case-insensitive, matches both the legacy ("own content")
+    // and current ("cannot vote on your own") trigger messages.
+    if (/own.{0,4}content|own post|cannot vote on your own/i.test(error.message ?? ""))
       return fail("forbidden", "You can't vote on your own content.");
     if (error.code === "42501")
       return { ...unauthenticated(), error: "Sign in to vote." };
+    // Foreign-key violation — the post or comment was deleted between render and click.
+    if (error.code === "23503")
+      return fail("not_found", "That post is no longer available.");
     return mapDbError("vote.rpc", error);
   }
   return ok();

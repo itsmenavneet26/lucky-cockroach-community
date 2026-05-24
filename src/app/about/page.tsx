@@ -1,7 +1,7 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { RightSidebar } from "@/components/layout/right-sidebar";
 
-export const metadata = { title: "About" };
+export const metadata = { title: "About", alternates: { canonical: "/about" } };
 export const revalidate = 3600;
 
 export default function AboutPage() {

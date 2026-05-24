@@ -2,7 +2,7 @@ import { HeartPulse } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { ComingSoon } from "@/components/coming-soon";
 
-export const metadata = { title: "Mental Health Support" };
+export const metadata = { title: "Mental Health Support", alternates: { canonical: "/mental-health" } };
 export const revalidate = 3600;
 
 export default function MentalHealthPage() {

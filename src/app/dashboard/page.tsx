@@ -67,6 +67,8 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const service = createServiceClient();
 
+  // Per-request RSC render — wall-clock is intentional here.
+  // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
   const d7 = new Date(now - 7 * 86400000).toISOString();
   const d14 = new Date(now - 14 * 86400000).toISOString();

@@ -92,7 +92,10 @@ export function mapDbError(
   err: DbErrorLike,
   overrides?: Partial<Record<string, { code: ErrorCode; message: string }>>,
 ): ActionFailure {
-  console.error(`[${scope}]`, err.code ?? "", err.message, err.details ?? "");
+  // Single structured line per failure so logs are greppable in prod.
+  console.error(
+    `[db-error] scope=${scope} code=${err.code ?? "none"} msg=${JSON.stringify(err.message ?? "")} details=${JSON.stringify(err.details ?? "")} hint=${JSON.stringify(err.hint ?? "")}`,
+  );
 
   const code = err.code ?? "";
   const ov = overrides?.[code];
@@ -128,9 +131,10 @@ export function mapDbError(
       // Fall through — surface the DB-provided message if it's safe-looking.
       return fail("server", humanizeDbMessage(err.message));
     default:
+      // Surface a tiny ref tag so users + support can find the log line by scope.
       return fail(
         "server",
-        "Something on our end didn't work. Please try again in a moment.",
+        `Something on our end didn't work. Please try again in a moment. (ref: ${scope})`,
       );
   }
 }

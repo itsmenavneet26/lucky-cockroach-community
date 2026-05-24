@@ -6,7 +6,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { getLeaderboard } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 
-export const metadata = { title: "Leaderboard" };
+export const metadata = { title: "Leaderboard", alternates: { canonical: "/leaderboard" } };
 export const revalidate = 300;
 
 export default async function LeaderboardPage() {

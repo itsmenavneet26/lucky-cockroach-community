@@ -19,6 +19,7 @@ export const metadata = {
   title: "Volunteer",
   description:
     "Join the groundwork — volunteer your time and skills with the Lucky Cockroach movement.",
+  alternates: { canonical: "/volunteer" },
 };
 
 /** Six core team cards — numbered 01..06 to mirror luckycockroach.com. */

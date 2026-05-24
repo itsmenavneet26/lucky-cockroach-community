@@ -2,7 +2,7 @@ import { GraduationCap } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { ComingSoon } from "@/components/coming-soon";
 
-export const metadata = { title: "Scholarship" };
+export const metadata = { title: "Scholarship", alternates: { canonical: "/scholarship" } };
 export const revalidate = 3600;
 
 export default function ScholarshipPage() {

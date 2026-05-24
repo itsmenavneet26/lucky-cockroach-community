@@ -1,7 +1,7 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { RightSidebar } from "@/components/layout/right-sidebar";
 
-export const metadata = { title: "Community guidelines" };
+export const metadata = { title: "Community guidelines", alternates: { canonical: "/guidelines" } };
 export const revalidate = 3600;
 
 const rules = [

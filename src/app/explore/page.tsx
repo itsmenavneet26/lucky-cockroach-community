@@ -4,7 +4,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { RightSidebar } from "@/components/layout/right-sidebar";
 import { getTopics } from "@/lib/queries";
 
-export const metadata = { title: "Explore topics" };
+export const metadata = { title: "Explore topics", alternates: { canonical: "/explore" } };
 
 export default async function ExplorePage() {
   const topics = await getTopics();
