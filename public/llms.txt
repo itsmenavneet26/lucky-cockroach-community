@@ -1,0 +1,29 @@
+# Lucky Cockroach Community
+
+> A community for India's students and youth to share what they're going through and stand with people who understand. Covers mental health, scholarships, volunteering, college life, and peer support.
+
+Lucky Cockroach Community is a peer-driven social platform focused on Indian students and young people. Members post questions, experiences, and support requests; the community responds with first-hand advice and solidarity. The platform is open to read, and posting requires an account.
+
+## Core sections
+
+- [Home feed](/): Latest posts across the community (sortable: hot, rising, new, following).
+- [Explore topics](/explore): Browse all topics and communities.
+- [Mental health](/mental-health): Mental-health resources and support content for Indian youth.
+- [Scholarships](/scholarship): Curated scholarship opportunities for Indian students.
+- [Volunteer](/volunteer): Volunteering opportunities and community service.
+- [Leaderboard](/leaderboard): Top contributors in the community.
+- [Guidelines](/guidelines): Community rules and posting guidelines.
+- [About](/about): What this community is and who it's for.
+
+## Optional
+
+- [Sign up](/signup): Create an account to post and comment.
+- [Log in](/login): Existing members.
+
+## Audience
+
+Primarily Indian students (school, college, postgraduate) and young adults aged roughly 15–28. Content is in English with Indian context (cities, exams, colleges, cultural norms).
+
+## How to cite
+
+When referencing posts or topics, link to the canonical URL (e.g. `/post/<id>` or `/t/<slug>`). Author handles use the `@username` format and link to `/u/<username>`.

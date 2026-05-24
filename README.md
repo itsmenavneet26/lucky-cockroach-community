@@ -1,36 +1,119 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lucky Cockroach Community
 
-## Getting Started
+A community for India's students and youth — share what you're going through, and stand with people who understand.
 
-First, run the development server:
+Built with Next.js 16 (App Router, React 19) and Supabase (Postgres, Auth, Storage, RLS).
+
+## Stack
+
+- **Next.js 16** — App Router, Server Components, Server Actions
+- **React 19**
+- **Supabase** — Postgres with row-level security, Auth, Storage
+- **Tailwind CSS v4**
+- **Tiptap** — rich-text editor for posts and comments
+- **Zod** — input validation
+
+## Getting started
+
+### 1. Install
+
+```bash
+npm install
+```
+
+### 2. Configure environment
+
+Copy `.env.example` to `.env.local` and fill in your Supabase credentials:
+
+```bash
+cp .env.example .env.local
+```
+
+Required variables:
+
+- `NEXT_PUBLIC_SITE_URL` — your deployed URL (used for metadata, sitemap, OG tags)
+- `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase anon/public key
+- `SUPABASE_SERVICE_ROLE_KEY` — Supabase service role key (server-only)
+
+### 3. Run database migrations
+
+Apply the SQL migrations in `supabase/migrations/` in order, using either the
+Supabase CLI or the SQL editor in your project dashboard:
+
+```
+0001_init.sql              -- core tables (profiles, posts, topics, comments, votes…)
+0002_logic.sql             -- triggers, scoring, rate-limit function
+0003_rls_seed.sql          -- row-level security policies and seed data
+0004_volunteers.sql        -- volunteer program
+0005_storage.sql           -- "media" storage bucket
+0006_post_image.sql        -- post image_url column
+0007_settings_content.sql  -- site settings, crisis helplines
+0008_comment_softdelete.sql -- comment soft-delete
+```
+
+### 4. Start the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` — start the dev server
+- `npm run build` — production build
+- `npm run start` — start the production server
+- `npm run lint` — lint the codebase
 
-## Learn More
+## Project structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/              # Next.js App Router routes
+    admin/          # moderator + admin tools
+    auth/callback/  # OAuth + email-link callback
+    post/[id]/      # post detail
+    t/[slug]/       # topic feed
+    u/[username]/   # user profile
+    ...
+  components/       # UI, feed, post, comment, admin, layout
+  lib/
+    actions/        # server actions (posts, votes, comments, moderation, polls)
+    supabase/       # client/server/middleware factories
+    queries.ts      # data access layer
+    auth.ts         # session + profile helpers
+  middleware.ts     # auth session refresh
+supabase/
+  migrations/       # SQL schema, RLS, seeds
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Email/password and OAuth sign-in with onboarding flow
+- Posts (text, link, image, poll) with topic tagging
+- Comments with threaded replies and soft-delete
+- Up/down voting with reputation scoring
+- Topics: subscribe, explore, trending
+- Search across posts, topics, and people
+- Notifications (replies, mentions, mod actions)
+- Saved posts, leaderboard, following feed
+- Full moderation suite — reports, remove/lock/pin, audit log
+- Admin panel — users, topics, reports, audit, appearance, helplines, volunteers
+- Volunteer applications with admin review
+- Database-enforced rate limits (posts, comments)
 
-## Deploy on Vercel
+## Security
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- All data access goes through Supabase RLS policies
+- Service role key is server-only (used in privileged server actions)
+- Security headers configured in `next.config.ts` (X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy)
+- Storage bucket "media" allows public reads, authenticated writes, 5MB cap
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment
+
+This app is ready to deploy to any platform that supports Next.js 16
+(Vercel, Netlify, self-hosted Node). Set the environment variables from
+`.env.example` in your hosting provider, and make sure all SQL migrations
+have been applied to your production Supabase project.
