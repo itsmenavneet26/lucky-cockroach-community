@@ -13,11 +13,11 @@ import {
   HeartHandshake,
   HeartPulse,
   GraduationCap,
-  Users,
   PanelLeftClose,
   PanelLeft,
 } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
+import { InviteButton } from "@/components/layout/invite-button";
 import { cn } from "@/lib/utils";
 
 type TopicLink = { slug: string; name: string };
@@ -165,13 +165,10 @@ export function LeftSidebar({
           <p className="mt-0.5 text-[12px] text-ink-soft">
             Together, we go further.
           </p>
-          <Link
-            href="/explore"
-            className="mt-3 flex h-9 items-center justify-center gap-1.5 rounded-[var(--radius)] bg-accent text-[13px] font-semibold text-on-accent hover:bg-accent-hover"
-          >
-            <Users size={14} />
-            Invite friends
-          </Link>
+          <InviteButton
+            url={process.env.NEXT_PUBLIC_SITE_URL || "https://community.luckycockroach.com"}
+            className="mt-3 flex h-9 w-full items-center justify-center gap-1.5 rounded-[var(--radius)] bg-accent text-[13px] font-semibold text-on-accent hover:bg-accent-hover"
+          />
         </div>
       )}
     </nav>
