@@ -37,7 +37,7 @@ test.describe("authenticated user flows @critical", () => {
       await expect(errorToast).toHaveCount(0, { timeout: 2500 });
       return;
     }
-    test.fail(true, "Every post in the feed appears to be the test user's own.");
+    throw new Error("Every post in the feed appears to be the test user's own — cannot verify vote on others' posts.");
   });
 
   test("settings page renders user's saved profile fields", async ({ signedInPage: page }) => {

@@ -118,7 +118,14 @@ export default async function PostPage({
     <AppShell rightSidebar={<RightSidebar />}>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        // `JSON.stringify` doesn't escape `<` or `&`; a post title containing
+        // "</script>…" would break out of this tag. Escape both before render.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd)
+            .replace(/</g, "\\u003c")
+            .replace(/>/g, "\\u003e")
+            .replace(/&/g, "\\u0026")
+        }}
       />
       <div className="flex flex-col gap-4">
         {isStaff && (

@@ -97,13 +97,15 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${outfit.variable} h-full`} suppressHydrationWarning>
+    <html lang="en" data-scroll-behavior="smooth" className={`${outfit.variable} h-full`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-full" suppressHydrationWarning>
         <script
           type="application/ld+json"
+          // Constants today, but escape defensively so any future dynamic value
+          // can't break out of this <script> tag.
           dangerouslySetInnerHTML={{
             __html: JSON.stringify([
               {
@@ -125,7 +127,10 @@ export default function RootLayout({
                   "query-input": "required name=search_term_string",
                 },
               },
-            ]),
+            ])
+              .replace(/</g, "\\u003c")
+              .replace(/>/g, "\\u003e")
+              .replace(/&/g, "\\u0026"),
           }}
         />
         <ToastProvider>{children}</ToastProvider>

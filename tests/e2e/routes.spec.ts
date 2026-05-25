@@ -36,7 +36,14 @@ function setupErrorCollectors(page: Page) {
     consoleErrors.push(text);
   });
   page.on("requestfailed", (req) => {
-    failed.push(`${req.method()} ${req.url()} :: ${req.failure()?.errorText}`);
+    const url = req.url();
+    const err = req.failure()?.errorText ?? "";
+    // Ignore Next.js RSC prefetch aborts — they're cancelled when the test
+    // navigates before the prefetch settles, not a real failure.
+    if (/_rsc=/.test(url) && err.includes("ERR_ABORTED")) return;
+    // Ignore aborted preloads of any resource — same reason.
+    if (err.includes("ERR_ABORTED")) return;
+    failed.push(`${req.method()} ${url} :: ${err}`);
   });
   page.on("response", (res) => {
     const u = res.url();
