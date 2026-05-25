@@ -13,11 +13,52 @@ const PROTECTED = [
 
 const AUTH_ONLY = ["/login", "/signup", "/forgot-password"];
 
+/**
+ * Public-content paths that should be cacheable at the edge for anonymous
+ * visitors. These routes also need to skip Supabase auth refresh when no
+ * `sb-*` auth cookie is present — otherwise the response would carry a
+ * Set-Cookie header and Vercel's edge cache treats it as private.
+ */
+const PUBLIC_PATHS = new Set([
+  "/",
+  "/about",
+  "/explore",
+  "/guidelines",
+  "/leaderboard",
+  "/mental-health",
+  "/scholarship",
+  "/volunteer",
+]);
+
+const PUBLIC_PREFIXES = ["/t/", "/u/", "/post/"];
+
+function isPublicPath(path: string): boolean {
+  if (PUBLIC_PATHS.has(path)) return true;
+  return PUBLIC_PREFIXES.some((p) => path.startsWith(p));
+}
+
+function hasAuthCookie(request: NextRequest): boolean {
+  // Supabase stores its session in cookies named `sb-<projectRef>-auth-token`.
+  // We don't need to know the project ref — any cookie that starts with `sb-`
+  // and looks like an auth token is enough to opt into the auth refresh path.
+  for (const c of request.cookies.getAll()) {
+    if (c.name.startsWith("sb-") && c.name.endsWith("-auth-token")) return true;
+  }
+  return false;
+}
+
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   // Supabase not configured yet — skip auth so the app still previews.
   if (!isSupabaseConfigured()) return response;
+
+  // Fast path: anonymous user on a public-content route → never touch auth
+  // cookies, so the response stays cacheable at Vercel's edge.
+  const path = request.nextUrl.pathname;
+  if (isPublicPath(path) && !hasAuthCookie(request)) {
+    return response;
+  }
 
   const supabase = createServerClient(
     PUBLIC_ENV.SUPABASE_URL!,
@@ -51,7 +92,6 @@ export async function updateSession(request: NextRequest) {
     console.warn("[middleware] getUser error:", error.message);
   }
 
-  const path = request.nextUrl.pathname;
   const needsAuth = PROTECTED.some(
     (p) => path === p || path.startsWith(p + "/"),
   );

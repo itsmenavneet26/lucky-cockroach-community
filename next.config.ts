@@ -24,23 +24,65 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
-    return [
+    const securityHeaders = [
+      { key: "X-Frame-Options", value: "DENY" },
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
       {
-        source: "/:path*",
+        key: "Permissions-Policy",
+        value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+      },
+      {
+        key: "Strict-Transport-Security",
+        value: "max-age=63072000; includeSubDomains; preload",
+      },
+      { key: "X-DNS-Prefetch-Control", value: "on" },
+    ];
+
+    return [
+      // Site-wide security headers.
+      { source: "/:path*", headers: securityHeaders },
+
+      // Marketing / evergreen content — safe to cache aggressively. Anonymous
+      // visitors hit this from the edge in ~20 ms; the proxy short-circuits
+      // session refresh so no Set-Cookie ruins the cache key.
+      {
+        source: "/:path(|about|guidelines|mental-health|scholarship|volunteer)",
         headers: [
-          { key: "X-Frame-Options", value: "DENY" },
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+            key: "Cache-Control",
+            value: "public, s-maxage=3600, stale-while-revalidate=86400",
           },
-          // Force HTTPS for two years; safe on Vercel/managed hosting.
+        ],
+      },
+
+      // Content lists that change often but tolerate slight staleness.
+      {
+        source: "/:path(explore|leaderboard)",
+        headers: [
           {
-            key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload",
+            key: "Cache-Control",
+            value: "public, s-maxage=60, stale-while-revalidate=300",
           },
-          { key: "X-DNS-Prefetch-Control", value: "on" },
+        ],
+      },
+
+      // Public profile / topic / post detail pages.
+      {
+        source: "/:path(t|u|post)/:slug*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=60, stale-while-revalidate=300",
+          },
+        ],
+      },
+
+      // Static assets we serve from /public — long-lived, immutable.
+      {
+        source: "/:asset(robots.txt|sitemap.xml|llms.txt|favicon.ico|onboarding.png)",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=3600, s-maxage=86400" },
         ],
       },
     ];

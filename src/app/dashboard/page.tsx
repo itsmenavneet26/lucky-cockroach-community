@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import {
   Award,
@@ -62,7 +63,39 @@ function trend(current: number, prior: number): string {
   return `${pct >= 0 ? "+" : ""}${pct}%`;
 }
 
-export default async function DashboardPage() {
+/**
+ * Stream the dashboard: shell paints immediately, the 16 queries below
+ * resolve inside the Suspense boundary while the skeleton holds the layout.
+ */
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<DashboardSkeleton />}>
+      <DashboardBody />
+    </Suspense>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="h-7 w-48 animate-pulse rounded bg-surface-2" />
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {[0, 1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="h-24 animate-pulse rounded-[var(--radius-xl)] border border-border bg-surface"
+          />
+        ))}
+      </div>
+      <div className="grid gap-3 lg:grid-cols-3">
+        <div className="h-64 animate-pulse rounded-[var(--radius-xl)] border border-border bg-surface lg:col-span-2" />
+        <div className="h-64 animate-pulse rounded-[var(--radius-xl)] border border-border bg-surface" />
+      </div>
+    </div>
+  );
+}
+
+async function DashboardBody() {
   const profile = (await getProfile())!;
   const supabase = await createClient();
   const service = createServiceClient();
@@ -95,7 +128,7 @@ export default async function DashboardPage() {
     getFollowState(profile.id),
     getUserBadges(profile.id),
     getFeedPosts({ authorId: profile.id, sort: "new", limit: 4 }),
-    getUserComments(profile.id),
+    getUserComments(profile.id, 4),
     getNotifications(),
     getSavedPosts(),
     supabase

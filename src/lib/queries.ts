@@ -549,7 +549,10 @@ export type UserComment = {
   post: { id: string; title: string } | null;
 };
 
-export async function getUserComments(userId: string): Promise<UserComment[]> {
+export async function getUserComments(
+  userId: string,
+  limit = 30,
+): Promise<UserComment[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("comments")
@@ -557,7 +560,7 @@ export async function getUserComments(userId: string): Promise<UserComment[]> {
     .eq("author_id", userId)
     .eq("is_removed", false)
     .order("created_at", { ascending: false })
-    .limit(30);
+    .limit(limit);
   return (data as unknown as UserComment[]) ?? [];
 }
 
