@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast";
 
@@ -134,6 +136,8 @@ export default function RootLayout({
           }}
         />
         <ToastProvider>{children}</ToastProvider>
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

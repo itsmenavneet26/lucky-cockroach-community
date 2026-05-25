@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
@@ -11,11 +12,17 @@ import { getProfile } from "@/lib/auth";
 import { getNotifications } from "@/lib/queries";
 import type { Topic } from "@/lib/types";
 
-export async function SiteHeader({ topics = [] }: { topics?: Topic[] }) {
-  const profile = await getProfile();
-  const notifications = profile ? await getNotifications() : [];
-  const unread = notifications.filter((n) => !n.is_read).length;
-
+/**
+ * Public header — never reads cookies/headers, so it prerenders into the
+ * static shell. The auth-aware bits (avatar, notifications bell, "Create
+ * Post" button) live inside the `<Suspense>` below and stream in once
+ * `getProfile()` resolves on the server.
+ *
+ * This is what unlocks the `Cache-Control: public, s-maxage=...` headers
+ * configured in `next.config.ts`: the prerendered shell can be cached at
+ * Vercel's edge, while signed-in personalisation streams in per request.
+ */
+export function SiteHeader({ topics = [] }: { topics?: Topic[] }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-3 px-4">
@@ -57,25 +64,47 @@ export async function SiteHeader({ topics = [] }: { topics?: Topic[] }) {
         </form>
 
         <div className="ml-auto flex items-center gap-1.5">
-          <CreatePostButton topics={topics} userId={profile?.id ?? null} />
-
-          {profile && (
-            <NotificationsBell notifications={notifications} unread={unread} />
-          )}
-
           <ThemeToggle />
-
-          {profile ? (
-            <UserMenu profile={profile} />
-          ) : (
-            <Link href="/login">
-              <Button variant="secondary" className="h-10 rounded-full">
-                Sign in
-              </Button>
-            </Link>
-          )}
+          <Suspense fallback={<AuthIslandFallback />}>
+            <AuthIsland topics={topics} />
+          </Suspense>
         </div>
       </div>
     </header>
+  );
+}
+
+/**
+ * Signed-out fallback shown until the AuthIsland resolves. Same layout
+ * footprint so the header doesn't reflow when the island arrives.
+ */
+function AuthIslandFallback() {
+  return (
+    <Link href="/login">
+      <Button variant="secondary" className="h-10 rounded-full">
+        Sign in
+      </Button>
+    </Link>
+  );
+}
+
+/**
+ * Dynamic island that resolves the current user and renders personalised
+ * controls. Server-rendered, but isolated inside <Suspense> so the rest of
+ * the page can stream / be prerendered without waiting on auth I/O.
+ */
+async function AuthIsland({ topics = [] }: { topics?: Topic[] }) {
+  const profile = await getProfile();
+  if (!profile) return <AuthIslandFallback />;
+
+  const notifications = await getNotifications();
+  const unread = notifications.filter((n) => !n.is_read).length;
+
+  return (
+    <>
+      <CreatePostButton topics={topics} userId={profile.id} />
+      <NotificationsBell notifications={notifications} unread={unread} />
+      <UserMenu profile={profile} />
+    </>
   );
 }

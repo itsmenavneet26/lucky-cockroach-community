@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth";
 import type {
@@ -61,16 +62,30 @@ const DEFAULT_SETTINGS: SiteSettings = {
   default_feed_sort: "hot",
 };
 
-/** Site-wide settings — admin-editable. Cached per request. */
-export const getSettings = cache(async (): Promise<SiteSettings> => {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("site_settings")
-    .select("*")
-    .eq("id", 1)
-    .maybeSingle();
-  return data ? ({ ...DEFAULT_SETTINGS, ...data } as SiteSettings) : DEFAULT_SETTINGS;
-});
+/**
+ * Site-wide settings — admin-editable. Cached cross-request via
+ * `unstable_cache` (tag: "settings") so every public page reuses one read.
+ * Admin mutations call `revalidateTag("settings")` to flush.
+ * Wrapped again in React `cache()` so multiple components in one render
+ * dedup to a single hit.
+ */
+export const getSettings = cache(
+  unstable_cache(
+    async (): Promise<SiteSettings> => {
+      const service = createServiceClient();
+      const { data } = await service
+        .from("site_settings")
+        .select("*")
+        .eq("id", 1)
+        .maybeSingle();
+      return data
+        ? ({ ...DEFAULT_SETTINGS, ...data } as SiteSettings)
+        : DEFAULT_SETTINGS;
+    },
+    ["site-settings"],
+    { tags: ["settings"], revalidate: 300 },
+  ),
+);
 
 const POST_SELECT = `
   id, author_id, topic_id, title, body, body_text, post_type, link_url, image_url,
@@ -253,15 +268,24 @@ export async function getTopic(slug: string): Promise<Topic | null> {
   return (data as Topic) ?? null;
 }
 
-export async function getTopics(): Promise<Topic[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("topics")
-    .select("*")
-    .eq("is_archived", false)
-    .order("sort_order");
-  return (data as Topic[]) ?? [];
-}
+/**
+ * Active topics — the same list on every page. Cached cross-request with
+ * tag `topics`; admin topic-management actions should call
+ * `revalidateTag("topics")` to flush.
+ */
+export const getTopics = unstable_cache(
+  async (): Promise<Topic[]> => {
+    const service = createServiceClient();
+    const { data } = await service
+      .from("topics")
+      .select("*")
+      .eq("is_archived", false)
+      .order("sort_order");
+    return (data as Topic[]) ?? [];
+  },
+  ["topics-active"],
+  { tags: ["topics"], revalidate: 300 },
+);
 
 /** Full-text search across posts. */
 export async function searchPosts(query: string): Promise<PostWithMeta[]> {
@@ -446,17 +470,26 @@ export async function getSavedPosts(): Promise<PostWithMeta[]> {
     .filter((p): p is PostWithMeta => Boolean(p));
 }
 
-export async function getLeaderboard(limit = 25): Promise<Profile[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("is_banned", false)
-    .order("karma", { ascending: false })
-    .order("created_at", { ascending: true })
-    .limit(limit);
-  return (data as Profile[]) ?? [];
-}
+/**
+ * Top community members by karma. Cached for 60s with tag `leaderboard`;
+ * karma trigger (or admin actions) can `revalidateTag("leaderboard")` for
+ * fresh state. Uses service client because the leaderboard is public.
+ */
+export const getLeaderboard = unstable_cache(
+  async (limit = 25): Promise<Profile[]> => {
+    const service = createServiceClient();
+    const { data } = await service
+      .from("profiles")
+      .select("*")
+      .eq("is_banned", false)
+      .order("karma", { ascending: false })
+      .order("created_at", { ascending: true })
+      .limit(limit);
+    return (data as Profile[]) ?? [];
+  },
+  ["leaderboard"],
+  { tags: ["leaderboard"], revalidate: 60 },
+);
 
 const COMMENT_SELECT = `
   id, post_id, author_id, parent_id, path, depth, body, body_text,

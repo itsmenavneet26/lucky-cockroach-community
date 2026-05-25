@@ -33,6 +33,13 @@ function setupErrorCollectors(page: Page) {
     const text = msg.text();
     // Ignore 4xx/network noise from missing seed assets — surfaced separately.
     if (/Failed to load resource.*400|Failed to load resource.*404/.test(text)) return;
+    // Ignore Vercel Analytics / Speed Insights — those endpoints only exist
+    // on real Vercel deploys; locally `next start` returns 404 HTML which
+    // the browser then refuses to execute as JS.
+    if (/_vercel\/(speed-insights|insights)/.test(text)) return;
+    if (/vitals\.vercel-insights\.com/.test(text)) return;
+    if (/ERR_SSL_PROTOCOL_ERROR/.test(text)) return;
+    if (/MIME type.*'text\/html' is not executable/.test(text)) return;
     consoleErrors.push(text);
   });
   page.on("requestfailed", (req) => {
@@ -43,6 +50,9 @@ function setupErrorCollectors(page: Page) {
     if (/_rsc=/.test(url) && err.includes("ERR_ABORTED")) return;
     // Ignore aborted preloads of any resource — same reason.
     if (err.includes("ERR_ABORTED")) return;
+    // Vercel Analytics / Speed Insights endpoints — only present on real
+    // Vercel deploys; locally they return 404 HTML.
+    if (/_vercel\/(speed-insights|insights)|vitals\.vercel-insights\.com/.test(url)) return;
     failed.push(`${req.method()} ${url} :: ${err}`);
   });
   page.on("response", (res) => {

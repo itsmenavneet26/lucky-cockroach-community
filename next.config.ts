@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const supabaseHost = (() => {
   try {
@@ -24,7 +25,29 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
+    // Content Security Policy — defense-in-depth against XSS (the JSON-LD
+    // sink was already patched). Allowing `unsafe-inline` for scripts is a
+    // necessary concession to Next.js's inline hydration data and our
+    // theme-init script in <head>. Tighten further later by switching to
+    // strict-dynamic + per-request nonces if we host scripts elsewhere.
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      `connect-src 'self' ${supabaseHost ? `https://${supabaseHost} wss://${supabaseHost}` : "https://*.supabase.co wss://*.supabase.co"} https://vitals.vercel-insights.com`,
+      "frame-ancestors 'none'",
+      "form-action 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      // `upgrade-insecure-requests` would break local Playwright runs by
+      // forcing http://localhost → https://localhost. HSTS already enforces
+      // HTTPS for the real domain, so this directive is redundant in prod.
+    ].join("; ");
+
     const securityHeaders = [
+      { key: "Content-Security-Policy", value: csp },
       { key: "X-Frame-Options", value: "DENY" },
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
@@ -89,4 +112,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+})(nextConfig);
