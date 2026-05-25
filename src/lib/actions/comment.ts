@@ -2,8 +2,9 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { requireActiveUser } from "@/lib/auth";
+import { notifyMentions } from "@/lib/notify-mentions";
 import {
   fail,
   forbidden,
@@ -14,45 +15,6 @@ import {
   unauthenticated,
   type ActionResult,
 } from "@/lib/errors";
-
-/** Notify mentioned users (@username). Best-effort, never blocks the comment. */
-async function notifyMentions(
-  text: string,
-  commentId: string,
-  authorId: string,
-) {
-  const usernames = [
-    ...new Set(
-      [...text.matchAll(/@([a-z0-9_]{3,20})/gi)].map((m) => m[1].toLowerCase()),
-    ),
-  ].slice(0, 10);
-  if (usernames.length === 0) return;
-
-  const service = createServiceClient();
-  const { data: people, error } = await service
-    .from("profiles")
-    .select("id, username")
-    .in("username", usernames);
-  if (error) {
-    console.error("[comment] notifyMentions lookup:", error.message);
-    return;
-  }
-  const targets = (people ?? []).filter((p) => p.id !== authorId);
-  if (targets.length === 0) return;
-
-  const { error: insertErr } = await service.from("notifications").insert(
-    targets.map((p) => ({
-      user_id: p.id,
-      type: "mention" as const,
-      actor_id: authorId,
-      target_type: "comment",
-      target_id: commentId,
-    })),
-  );
-  if (insertErr) {
-    console.error("[comment] notifyMentions insert:", insertErr.message);
-  }
-}
 
 const bodySchema = z
   .string()
@@ -74,13 +36,25 @@ export async function createComment(
 
   const { data: post, error: postErr } = await supabase
     .from("posts")
-    .select("is_locked")
+    .select("is_locked, author_id")
     .eq("id", postId)
     .maybeSingle();
   if (postErr) return mapDbError("comment.postLookup", postErr);
   if (!post) return notFound("This post no longer exists.");
   if (post.is_locked)
     return fail("forbidden", "This post is locked — no new comments.");
+
+  let replyRecipient: string | null = null;
+  if (parentId) {
+    const { data: parent } = await supabase
+      .from("comments")
+      .select("author_id")
+      .eq("id", parentId)
+      .maybeSingle();
+    replyRecipient = parent?.author_id ?? null;
+  } else {
+    replyRecipient = post.author_id ?? null;
+  }
 
   const { data: comment, error } = await supabase
     .from("comments")
@@ -94,15 +68,28 @@ export async function createComment(
     .select("id")
     .single();
   if (error || !comment) {
-    if (error?.code === "42501")
-      return fail(
-        "rate_limited",
-        "You're commenting too quickly. Please slow down.",
+    if (error?.code === "42501") {
+      // RLS denial. After 0015 this should only fire on a real ban or
+      // an auth.uid()/author_id mismatch. Log loudly so we can debug if
+      // it ever fires on a legit user.
+      console.error(
+        `[db-error] scope=comment.insert.rls user=${active.user.id} msg=${JSON.stringify(error.message)} details=${JSON.stringify(error.details ?? "")} hint=${JSON.stringify(error.hint ?? "")}`,
       );
+      return fail(
+        "forbidden",
+        "You can't comment right now. If you think this is a mistake, contact support.",
+      );
+    }
     return mapDbError("comment.insert", error ?? { message: "no row" });
   }
 
-  await notifyMentions(parsed.data, comment.id, active.user.id);
+  await notifyMentions({
+    text: parsed.data,
+    authorId: active.user.id,
+    targetType: "comment",
+    targetId: comment.id,
+    excludeIds: replyRecipient ? [replyRecipient] : [],
+  });
 
   revalidatePath(`/post/${postId}`);
   return ok();
