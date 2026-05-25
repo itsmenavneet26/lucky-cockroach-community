@@ -97,13 +97,17 @@ async function AuthIsland({ topics = [] }: { topics?: Topic[] }) {
   const profile = await getProfile();
   if (!profile) return <AuthIslandFallback />;
 
-  const notifications = await getNotifications();
+  const { items: notifications } = await getNotifications({ limit: 20 });
   const unread = notifications.filter((n) => !n.is_read).length;
 
   return (
     <>
       <CreatePostButton topics={topics} userId={profile.id} />
-      <NotificationsBell notifications={notifications} unread={unread} />
+      <NotificationsBell
+        notifications={notifications}
+        unread={unread}
+        userId={profile.id}
+      />
       <UserMenu profile={profile} />
     </>
   );

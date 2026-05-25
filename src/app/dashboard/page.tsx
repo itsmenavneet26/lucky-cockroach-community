@@ -112,7 +112,7 @@ async function DashboardBody() {
     badges,
     recentPosts,
     recentComments,
-    notifications,
+    notifPage,
     saved,
     postCount,
     commentCount,
@@ -129,7 +129,7 @@ async function DashboardBody() {
     getUserBadges(profile.id),
     getFeedPosts({ authorId: profile.id, sort: "new", limit: 4 }),
     getUserComments(profile.id, 4),
-    getNotifications(),
+    getNotifications({ limit: 10 }),
     getSavedPosts(),
     supabase
       .from("posts")
@@ -216,6 +216,7 @@ async function DashboardBody() {
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
+  const notifications = notifPage.items;
   const unreadCount = notifications.filter((n) => !n.is_read).length;
   const name = profile.display_name || profile.username;
   const firstName = name.split(" ")[0];

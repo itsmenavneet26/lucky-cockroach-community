@@ -8,10 +8,13 @@ import { getNotifications, getTopics } from "@/lib/queries";
 
 export async function AdminTopbar() {
   const profile = await getProfile();
-  const [notifications, topics] = await Promise.all([
-    profile ? getNotifications() : Promise.resolve([]),
+  const [notif, topics] = await Promise.all([
+    profile
+      ? getNotifications({ limit: 20 })
+      : Promise.resolve({ items: [], nextCursor: null }),
     getTopics(),
   ]);
+  const notifications = notif.items;
   const unread = notifications.filter((n) => !n.is_read).length;
 
   return (
@@ -32,7 +35,11 @@ export async function AdminTopbar() {
 
         <div className="ml-auto flex items-center gap-1.5">
           {profile && (
-            <NotificationsBell notifications={notifications} unread={unread} />
+            <NotificationsBell
+              notifications={notifications}
+              unread={unread}
+              userId={profile.id}
+            />
           )}
           <CreatePostButton topics={topics} userId={profile?.id ?? null} />
           <ThemeToggle />
