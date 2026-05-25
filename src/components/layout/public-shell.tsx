@@ -1,6 +1,7 @@
 import { PublicSiteHeader } from "@/components/layout/public-site-header";
 import { LeftSidebar } from "@/components/layout/left-sidebar";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
+import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { getTopics } from "@/lib/queries";
 
 /**
@@ -30,7 +31,7 @@ export async function PublicShell({
     <div className="min-h-screen bg-bg">
       <AnnouncementBar />
       <PublicSiteHeader topics={topics} />
-      <div className="mx-auto flex max-w-[1400px] gap-6 px-4 py-6">
+      <div className="mx-auto flex max-w-[1400px] gap-6 px-4 py-6 pb-[calc(64px+env(safe-area-inset-bottom))] lg:pb-6">
         <aside className="hidden shrink-0 lg:block">
           <div className="sticky top-[88px]">
             <LeftSidebar topics={topics} />
@@ -45,6 +46,7 @@ export async function PublicShell({
           </aside>
         )}
       </div>
+      <MobileBottomNav />
     </div>
   );
 }
