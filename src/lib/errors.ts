@@ -71,7 +71,7 @@ type DbErrorLike = {
   hint?: string | null;
 };
 
-/** Postgres SQLSTATE codes we recognise. */
+/** Postgres SQLSTATE + PostgREST codes we recognise. */
 const PG = {
   UNIQUE_VIOLATION: "23505",
   FOREIGN_KEY_VIOLATION: "23503",
@@ -79,8 +79,16 @@ const PG = {
   CHECK_VIOLATION: "23514",
   STRING_RIGHT_TRUNCATION: "22001",
   INSUFFICIENT_PRIVILEGE: "42501",
+  UNDEFINED_FUNCTION: "42883",
+  UNDEFINED_TABLE: "42P01",
   RAISE_EXCEPTION: "P0001",
   NOT_FOUND: "PGRST116",
+  // PostgREST: function not in schema cache (a migration hasn't been run).
+  POSTGREST_FN_NOT_FOUND: "PGRST202",
+  // PostgREST: relation not in schema cache.
+  POSTGREST_REL_NOT_FOUND: "PGRST205",
+  // PostgREST: JWT expired or invalid.
+  POSTGREST_JWT_EXPIRED: "PGRST301",
 } as const;
 
 /**
@@ -127,6 +135,22 @@ export function mapDbError(
       return fail("forbidden", "You don't have permission to do that.");
     case PG.NOT_FOUND:
       return fail("not_found", "We couldn't find what you were looking for.");
+    case PG.POSTGREST_JWT_EXPIRED:
+      return fail("unauthenticated", "Your session expired. Please sign in again.");
+    case PG.POSTGREST_FN_NOT_FOUND:
+    case PG.POSTGREST_REL_NOT_FOUND:
+    case PG.UNDEFINED_FUNCTION:
+    case PG.UNDEFINED_TABLE:
+      // A required DB object isn't present — usually a pending migration on
+      // the live database. Log loudly so admins can see; tell users it's an
+      // outage they can't fix themselves.
+      console.error(
+        `[db-error] MIGRATION MISSING in scope=${scope} — apply pending Supabase migrations: ${err.message}`,
+      );
+      return fail(
+        "unavailable",
+        "This feature is temporarily unavailable. The team has been notified.",
+      );
     case PG.RAISE_EXCEPTION:
       // Fall through — surface the DB-provided message if it's safe-looking.
       return fail("server", humanizeDbMessage(err.message));
