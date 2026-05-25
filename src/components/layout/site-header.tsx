@@ -36,12 +36,10 @@ export function SiteHeader({ topics = [] }: { topics?: Topic[] }) {
           <span className="grid h-10 w-10 place-items-center rounded-[var(--radius-lg)] bg-accent text-on-accent">
             <BrandMark className="h-6 w-6" />
           </span>
-          <span className="hidden leading-none sm:block">
-            <span className="block text-[16px] font-semibold tracking-[0.1em] text-ink">
-              LUCKY
-            </span>
-            <span className="block text-[10px] font-medium tracking-[0.3em] text-muted">
-              COCKROACH
+          <span className="hidden text-[15px] font-semibold leading-tight tracking-tight text-ink sm:block">
+            Lucky Cockroach
+            <span className="block text-[12px] font-medium text-muted">
+              Community
             </span>
           </span>
         </Link>

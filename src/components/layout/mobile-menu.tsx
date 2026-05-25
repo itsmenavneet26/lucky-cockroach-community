@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import { BrandMark } from "@/components/brand-mark";
 import { LeftSidebar } from "@/components/layout/left-sidebar";
 
 export function MobileMenu({
@@ -38,7 +40,26 @@ export function MobileMenu({
         onClick={() => setOpen(false)}
       />
       <div className="absolute left-0 top-0 flex h-full w-[280px] max-w-[85%] flex-col overflow-y-auto bg-surface p-4 shadow-pop">
-        <div className="mb-4 flex justify-end">
+        {/* Brand row — mirrors the desktop site header so the drawer feels
+            anchored, not orphan. Tapping the wordmark goes home and closes
+            the drawer; the X button on the right just closes it. */}
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <Link
+            href="/"
+            onClick={() => setOpen(false)}
+            aria-label="Lucky Cockroach Community — home"
+            className="flex shrink-0 items-center gap-2.5"
+          >
+            <span className="grid h-9 w-9 place-items-center rounded-[var(--radius)] bg-accent text-on-accent">
+              <BrandMark className="h-5 w-5" />
+            </span>
+            <span className="text-[14px] font-semibold leading-tight tracking-tight text-ink">
+              Lucky Cockroach
+              <span className="block text-[11px] font-medium text-muted">
+                Community
+              </span>
+            </span>
+          </Link>
           <button
             onClick={() => setOpen(false)}
             aria-label="Close menu"
