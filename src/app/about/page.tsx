@@ -1,12 +1,12 @@
-import { AppShell } from "@/components/layout/app-shell";
+import { PublicShell } from "@/components/layout/public-shell";
 import { RightSidebar } from "@/components/layout/right-sidebar";
 
 export const metadata = { title: "About", alternates: { canonical: "/about" } };
 export const revalidate = 3600;
 
-export default function AboutPage() {
+export default async function AboutPage() {
   return (
-    <AppShell rightSidebar={<RightSidebar />}>
+    <PublicShell rightSidebar={<RightSidebar />}>
       <article className="rounded-[var(--radius-lg)] border border-border bg-surface p-6">
         <h1 className="text-xl font-semibold tracking-tight text-ink">
           About the community
@@ -29,6 +29,6 @@ export default function AboutPage() {
           </p>
         </div>
       </article>
-    </AppShell>
+    </PublicShell>
   );
 }

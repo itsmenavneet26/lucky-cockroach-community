@@ -1,4 +1,4 @@
-import { AppShell } from "@/components/layout/app-shell";
+import { PublicShell } from "@/components/layout/public-shell";
 import { RightSidebar } from "@/components/layout/right-sidebar";
 
 export const metadata = { title: "Community guidelines", alternates: { canonical: "/guidelines" } };
@@ -13,9 +13,9 @@ const rules = [
   ["Take care with crisis", "If someone is in danger, point them to the Get help page. Don't dismiss anyone reaching out."],
 ];
 
-export default function GuidelinesPage() {
+export default async function GuidelinesPage() {
   return (
-    <AppShell rightSidebar={<RightSidebar />}>
+    <PublicShell rightSidebar={<RightSidebar />}>
       <article className="rounded-[var(--radius-lg)] border border-border bg-surface p-6">
         <h1 className="text-xl font-semibold tracking-tight text-ink">
           Community guidelines
@@ -37,6 +37,6 @@ export default function GuidelinesPage() {
           ))}
         </ol>
       </article>
-    </AppShell>
+    </PublicShell>
   );
 }

@@ -15,6 +15,12 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },
+  // cacheComponents is the long-term path to edge caching with `'use cache'`
+  // + cacheLife, but the project's formatter strips those directives. For now
+  // we rely on classic ISR via `export const revalidate = N` on pages that
+  // mount the cookie-free <PublicShell> — that combination still lets Next
+  // statically prerender + revalidate them, which gives sub-50 ms TTFB from
+  // the edge once Vercel has cached a build artifact.
   images: {
     remotePatterns: [
       {

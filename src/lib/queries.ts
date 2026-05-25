@@ -517,11 +517,31 @@ const NOTIF_TEXT: Record<string, string> = {
   mod_action: "a moderator acted on your content",
 };
 
-export async function getNotifications(): Promise<NotificationView[]> {
+const MOD_ACTION_TEXT: Record<string, string> = {
+  post_removed: "removed your post",
+  post_restored: "restored your post",
+  post_locked: "locked your post",
+  post_unlocked: "unlocked your post",
+  comment_removed: "removed your comment",
+  comment_restored: "restored your comment",
+  user_banned: "banned your account",
+  user_unbanned: "lifted your ban",
+};
+
+export type NotificationsPage = {
+  items: NotificationView[];
+  nextCursor: string | null;
+};
+
+export async function getNotifications(opts: {
+  limit?: number;
+  cursor?: string | null;
+} = {}): Promise<NotificationsPage> {
+  const limit = Math.min(Math.max(opts.limit ?? 20, 1), 50);
   const user = await getUser();
-  if (!user) return [];
+  if (!user) return { items: [], nextCursor: null };
   const supabase = await createClient();
-  const { data } = await supabase
+  let q = supabase
     .from("notifications")
     .select(
       `id, type, target_type, target_id, meta, is_read, created_at,
@@ -529,10 +549,22 @@ export async function getNotifications(): Promise<NotificationView[]> {
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
-    .limit(40);
-  if (!data) return [];
+    .order("id", { ascending: false })
+    .limit(limit + 1);
 
-  const commentIds = data
+  const cur = decodeCursor(opts.cursor ?? null);
+  if (cur) {
+    q = q.or(
+      `created_at.lt.${cur.ts},and(created_at.eq.${cur.ts},id.lt.${cur.id})`,
+    );
+  }
+
+  const { data } = await q;
+  if (!data) return { items: [], nextCursor: null };
+  const hasMore = data.length > limit;
+  const rows = hasMore ? data.slice(0, limit) : data;
+
+  const commentIds = rows
     .filter((n) => n.target_type === "comment" && n.target_id)
     .map((n) => n.target_id as string);
   const postByComment = new Map<string, string>();
@@ -544,7 +576,7 @@ export async function getNotifications(): Promise<NotificationView[]> {
     cs?.forEach((c) => postByComment.set(c.id, c.post_id));
   }
 
-  return data.map((n) => {
+  const items = rows.map((n) => {
     const actor = n.actor as unknown as {
       username: string;
       display_name: string | null;
@@ -568,10 +600,22 @@ export async function getNotifications(): Promise<NotificationView[]> {
       actorName: actor?.display_name || actor?.username || "Someone",
       actorUsername: actor?.username ?? null,
       actorAvatar: actor?.avatar_url ?? null,
-      text: NOTIF_TEXT[n.type] ?? "sent you a notification",
+      text:
+        n.type === "mod_action"
+          ? MOD_ACTION_TEXT[
+              (n.meta as { action?: string } | null)?.action ?? ""
+            ] ?? NOTIF_TEXT.mod_action
+          : NOTIF_TEXT[n.type] ?? "sent you a notification",
       href,
     };
   });
+
+  const last = rows[rows.length - 1];
+  const nextCursor =
+    hasMore && last
+      ? encodeCursor({ ts: last.created_at as string, id: last.id as string })
+      : null;
+  return { items, nextCursor };
 }
 
 export type UserComment = {
@@ -820,52 +864,63 @@ export async function getAuditLog(): Promise<AuditEntry[]> {
 }
 
 // ── Right sidebar data ───────────────────────────────────────
-export async function getCommunityStats() {
-  const supabase = await createClient();
-  // Members and posts come from the denormalised site_stats row updated
-  // by triggers; topics count is small and cheap.
-  const [statsRes, topicsRes] = await Promise.all([
-    supabase.from("site_stats").select("members_total, posts_total").eq("id", 1).maybeSingle(),
-    supabase.from("topics").select("id", { count: "exact", head: true }).eq("is_archived", false),
-  ]);
-  const stats = statsRes.data as { members_total: number; posts_total: number } | null;
-  return {
-    members: Number(stats?.members_total ?? 0),
-    posts: Number(stats?.posts_total ?? 0),
-    topics: topicsRes.count ?? 0,
-  };
-}
+/**
+ * Sidebar widget data — these three power every public page's RightSidebar.
+ * All three are public read-only, so we use the service client (no cookies
+ * → cache key isn't poisoned by per-request state) and wrap in
+ * unstable_cache so every visitor in a 60s window hits the same memo.
+ */
+export const getCommunityStats = unstable_cache(
+  async () => {
+    const service = createServiceClient();
+    const [statsRes, topicsRes] = await Promise.all([
+      service.from("site_stats").select("members_total, posts_total").eq("id", 1).maybeSingle(),
+      service.from("topics").select("id", { count: "exact", head: true }).eq("is_archived", false),
+    ]);
+    const stats = statsRes.data as { members_total: number; posts_total: number } | null;
+    return {
+      members: Number(stats?.members_total ?? 0),
+      posts: Number(stats?.posts_total ?? 0),
+      topics: topicsRes.count ?? 0,
+    };
+  },
+  ["community-stats"],
+  { tags: ["site-stats", "topics"], revalidate: 60 },
+);
 
-export async function getTrendingTags(
-  limit = 6,
-): Promise<{ slug: string; count: number }[]> {
-  const supabase = await createClient();
-  // Reads from the denormalised tag_stats table (kept in sync by trigger
-  // post_tags_stats_trg) — avoids scanning the full post_tags table on
-  // every sidebar render.
-  const { data, error } = await supabase
-    .from("tag_stats")
-    .select("post_count, tags!inner(slug)")
-    .order("post_count", { ascending: false })
-    .limit(limit);
-  if (error || !data) return [];
-  return data
-    .map((row) => {
-      const tag = row.tags as unknown as { slug: string } | null;
-      return { slug: tag?.slug ?? "", count: Number(row.post_count) };
-    })
-    .filter((t) => t.slug);
-}
+export const getTrendingTags = unstable_cache(
+  async (limit = 6): Promise<{ slug: string; count: number }[]> => {
+    const service = createServiceClient();
+    const { data, error } = await service
+      .from("tag_stats")
+      .select("post_count, tags!inner(slug)")
+      .order("post_count", { ascending: false })
+      .limit(limit);
+    if (error || !data) return [];
+    return data
+      .map((row) => {
+        const tag = row.tags as unknown as { slug: string } | null;
+        return { slug: tag?.slug ?? "", count: Number(row.post_count) };
+      })
+      .filter((t) => t.slug);
+  },
+  ["trending-tags"],
+  { tags: ["trending-tags"], revalidate: 300 },
+);
 
-export async function getNewestMembers(limit = 6): Promise<Profile[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("profiles")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(limit);
-  return (data as Profile[]) ?? [];
-}
+export const getNewestMembers = unstable_cache(
+  async (limit = 6): Promise<Profile[]> => {
+    const service = createServiceClient();
+    const { data } = await service
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    return (data as Profile[]) ?? [];
+  },
+  ["newest-members"],
+  { tags: ["newest-members"], revalidate: 300 },
+);
 
 // ── Admin dashboard ──────────────────────────────────────────
 export type DashboardData = {
