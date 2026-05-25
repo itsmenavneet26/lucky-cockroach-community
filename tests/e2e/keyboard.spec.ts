@@ -2,7 +2,9 @@ import { test, expect } from "@playwright/test";
 
 test.describe("keyboard navigation @critical", () => {
   test("Tab moves focus through interactive elements", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "networkidle" });
+    // Click into the body first to ensure the page has focus before tabbing.
+    await page.locator("body").click({ position: { x: 1, y: 1 } });
     await page.keyboard.press("Tab");
     // After at least one Tab, focus must be on a focusable element (not body)
     const focused = await page.evaluate(() => document.activeElement?.tagName);
