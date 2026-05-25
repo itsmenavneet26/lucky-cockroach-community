@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
 import type { UserRole } from "@/lib/types";
@@ -92,6 +92,7 @@ export async function createTopic(formData: FormData): Promise<Result> {
   await audit(admin, "topic_created", { slug, name });
   revalidatePath("/admin/topics");
   revalidatePath("/explore");
+  updateTag("topics");
   return ok();
 }
 
@@ -119,6 +120,7 @@ export async function updateTopic(formData: FormData): Promise<Result> {
   await audit(admin, "topic_updated", { id, name });
   revalidatePath("/admin/topics");
   revalidatePath("/explore");
+  updateTag("topics");
   return ok();
 }
 
@@ -136,6 +138,7 @@ export async function toggleTopicArchive(
   await audit(admin, archived ? "topic_archived" : "topic_restored", { id });
   revalidatePath("/admin/topics");
   revalidatePath("/explore");
+  updateTag("topics");
   return ok();
 }
 
@@ -229,6 +232,7 @@ export async function updateAppearance(formData: FormData): Promise<Result> {
   if (error) return fail("updateAppearance", error);
   await audit(admin, "appearance_updated");
   revalidatePath("/", "layout");
+  updateTag("settings");
   return ok();
 }
 
@@ -274,6 +278,7 @@ export async function updateGeneralSettings(
   if (error) return fail("updateGeneralSettings", error);
   await audit(admin, "settings_updated");
   revalidatePath("/", "layout");
+  updateTag("settings");
   return ok();
 }
 
@@ -309,5 +314,6 @@ export async function updateCrisisResources(json: string): Promise<Result> {
   if (error) return fail("updateCrisisResources", error);
   await audit(admin, "crisis_resources_updated");
   revalidatePath("/", "layout");
+  updateTag("settings");
   return ok();
 }

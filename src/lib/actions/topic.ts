@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { mapDbError } from "@/lib/errors";
 
@@ -44,6 +44,9 @@ export async function toggleTopicMembership(
       return { ok: false, joined: false, code: m.code, error: m.error };
     }
     revalidatePath(`/t/${slug}`);
+    // `getTopics` is unstable_cache'd with tag "topics" — without this,
+    // /explore keeps serving the pre-join member_count for 5 minutes.
+    updateTag("topics");
     return { ok: true, joined: false };
   }
   const { error } = await supabase
@@ -54,5 +57,6 @@ export async function toggleTopicMembership(
     return { ok: false, joined: false, code: m.code, error: m.error };
   }
   revalidatePath(`/t/${slug}`);
+  updateTag("topics");
   return { ok: true, joined: true };
 }
