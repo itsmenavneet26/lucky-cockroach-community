@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Bell, Reply, AtSign, UserPlus, Flame, Shield } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { markAllNotificationsRead } from "@/lib/actions/notification";
+import { createClient } from "@/lib/supabase/client";
 import { timeAgo, cn } from "@/lib/utils";
 import type { NotificationView } from "@/lib/queries";
 
@@ -20,9 +21,11 @@ const typeIcon: Record<string, typeof Bell> = {
 export function NotificationsBell({
   notifications,
   unread,
+  userId,
 }: {
   notifications: NotificationView[];
   unread: number;
+  userId: string | null;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -35,6 +38,27 @@ export function NotificationsBell({
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`notif:${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${userId}`,
+        },
+        () => router.refresh(),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId, router]);
 
   function toggle() {
     const next = !open;
