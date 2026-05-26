@@ -10,7 +10,6 @@ const PUBLIC_ROUTES = [
   { path: "/guidelines", titleIncludes: "Community guidelines" },
   { path: "/mental-health", titleIncludes: "Mental Health" },
   { path: "/scholarship", titleIncludes: "Scholarship" },
-  { path: "/volunteer", titleIncludes: "Volunteer" },
   { path: "/search", titleIncludes: "Search" },
   { path: "/forgot-password", titleIncludes: "Reset password" },
   { path: "/reset-password", titleIncludes: "Set new password" },

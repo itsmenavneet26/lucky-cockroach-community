@@ -14,11 +14,14 @@ export function HeroBanner({ hero }: { hero: HomeHero }) {
             alt=""
             className="absolute inset-0 h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0d0b0a]/85 via-[#0d0b0a]/55 to-transparent" />
+          {/* Overlay: in light mode the warm image tones can show through;
+              in dark mode we push to near-opaque black on the text side so
+              the warm bleed doesn't read as a brown wash. */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0d0b0a]/85 via-[#0d0b0a]/55 to-transparent dark:from-black dark:via-black/80 dark:to-black/20" />
         </>
       ) : (
         <>
-          <div className="absolute inset-0 bg-gradient-to-br from-accent-soft via-surface to-accent-soft" />
+          <div className="absolute inset-0 bg-gradient-to-br from-accent-soft via-surface to-accent-soft dark:bg-none dark:bg-bg" />
           <div
             aria-hidden
             className="pointer-events-none absolute -right-6 -top-8 text-accent/10"

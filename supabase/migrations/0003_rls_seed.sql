@@ -41,8 +41,7 @@ create policy posts_read on posts for select
   using (not is_removed or author_id = auth.uid() or is_moderator(auth.uid(), topic_id));
 create policy posts_insert on posts for insert
   with check (author_id = auth.uid()
-    and not is_user_banned(auth.uid())
-    and check_rate_limit(auth.uid(), 'post'));
+    and not is_user_banned(auth.uid()));
 create policy posts_update on posts for update
   using (author_id = auth.uid()) with check (author_id = auth.uid());
 create policy posts_delete on posts for delete using (author_id = auth.uid());
@@ -52,8 +51,7 @@ create policy comments_read on comments for select
   using (not is_removed or author_id = auth.uid());
 create policy comments_insert on comments for insert
   with check (author_id = auth.uid()
-    and not is_user_banned(auth.uid())
-    and check_rate_limit(auth.uid(), 'comment'));
+    and not is_user_banned(auth.uid()));
 create policy comments_update on comments for update
   using (author_id = auth.uid()) with check (author_id = auth.uid());
 create policy comments_delete on comments for delete using (author_id = auth.uid());

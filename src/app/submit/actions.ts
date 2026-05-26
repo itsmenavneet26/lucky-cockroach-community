@@ -8,6 +8,7 @@ import { requireActiveUser } from "@/lib/auth";
 import { slugify } from "@/lib/utils";
 import { parseAndSanitise } from "@/lib/sanitize";
 import { isSafeExternalUrl } from "@/lib/url-safety";
+import { notifyMentions } from "@/lib/notify-mentions";
 import {
   fail,
   fromZod,
@@ -168,6 +169,15 @@ export async function createPost(
     if (pollErr) {
       console.error("[submit] poll_options insert:", pollErr.message);
     }
+  }
+
+  if (v.bodyText.trim().length > 0) {
+    await notifyMentions({
+      text: v.bodyText,
+      authorId: active.user.id,
+      targetType: "post",
+      targetId: post.id,
+    });
   }
 
   // Narrow revalidation — avoid invalidating every home-feed variant on

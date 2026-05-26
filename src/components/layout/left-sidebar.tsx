@@ -15,6 +15,7 @@ import {
   GraduationCap,
   PanelLeftClose,
   PanelLeft,
+  ScrollText,
 } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
 import { InviteButton } from "@/components/layout/invite-button";
@@ -22,13 +23,21 @@ import { cn } from "@/lib/utils";
 
 type TopicLink = { slug: string; name: string };
 
-const nav = [
+type NavItem = {
+  href: string;
+  label: string;
+  icon: typeof Home;
+  external?: boolean;
+};
+
+const nav: NavItem[] = [
   { href: "/", label: "Home", icon: Home },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/explore", label: "Explore", icon: Compass },
   { href: "/saved", label: "Saved", icon: Bookmark },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
-  { href: "/volunteer", label: "Volunteer", icon: HeartHandshake },
+  { href: "https://luckycockroach.com/volunteer/", label: "Volunteer", icon: HeartHandshake, external: true },
+  { href: "https://luckycockroach.com/petition/", label: "Petitions", icon: ScrollText, external: true },
   { href: "/scholarship", label: "Scholarship", icon: GraduationCap },
   { href: "/mental-health", label: "Mental health", icon: HeartPulse },
 ];
@@ -92,30 +101,43 @@ export function LeftSidebar({
 
       {/* Main nav */}
       <ul className="flex flex-col gap-px">
-        {nav.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href;
+        {nav.map(({ href, label, icon: Icon, external }) => {
+          const active = !external && pathname === href;
+          const className = cn(
+            "group flex items-center rounded-[var(--radius)] font-medium",
+            mini ? "h-10 justify-center" : "h-9 gap-3 px-3",
+            active
+              ? "bg-accent-soft text-accent"
+              : "text-ink-soft hover:bg-surface-2 hover:text-ink",
+          );
+          const iconNode = (
+            <Icon
+              size={mini ? 19 : 17}
+              className={cn(
+                "shrink-0",
+                active ? "text-accent" : "text-ink-soft group-hover:text-ink",
+              )}
+            />
+          );
           return (
             <li key={href}>
-              <Link
-                href={href}
-                title={mini ? label : undefined}
-                className={cn(
-                  "group flex items-center rounded-[var(--radius)] font-medium",
-                  mini ? "h-10 justify-center" : "h-9 gap-3 px-3",
-                  active
-                    ? "bg-accent-soft text-accent"
-                    : "text-ink-soft hover:bg-surface-2 hover:text-ink",
-                )}
-              >
-                <Icon
-                  size={mini ? 19 : 17}
-                  className={cn(
-                    "shrink-0",
-                    active ? "text-accent" : "text-ink-soft group-hover:text-ink",
-                  )}
-                />
-                {!mini && <span className="truncate">{label}</span>}
-              </Link>
+              {external ? (
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={mini ? label : undefined}
+                  className={className}
+                >
+                  {iconNode}
+                  {!mini && <span className="truncate">{label}</span>}
+                </a>
+              ) : (
+                <Link href={href} title={mini ? label : undefined} className={className}>
+                  {iconNode}
+                  {!mini && <span className="truncate">{label}</span>}
+                </Link>
+              )}
             </li>
           );
         })}

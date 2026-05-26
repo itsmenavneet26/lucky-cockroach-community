@@ -79,7 +79,7 @@ function DashboardSkeleton() {
   return (
     <div className="flex flex-col gap-4">
       <div className="h-7 w-48 animate-pulse rounded bg-surface-2" />
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
@@ -303,7 +303,7 @@ async function DashboardBody() {
       </div>
 
       {/* Stat strip */}
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <StatCard
           icon={Sparkles}
           label="Karma"
@@ -349,7 +349,7 @@ async function DashboardBody() {
 
       {/* Quick actions */}
       <Panel title="Quick actions">
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
           {actions.map(({ href, label, description, icon: Icon, primary, badge }) => (
             <Link
               key={label}

@@ -4,7 +4,7 @@
 
 /* ── Design tokens — Lucky Cockroach Community ──
    Calm editorial system. One typeface (Outfit). One restrained accent.
-   Light = warm off-white. Dark = warm charcoal (not pure black). */
+   Light = warm off-white. Dark = neutral black. */
 :root {
   --bg: #faf8f4;
   --surface: #ffffff;
@@ -26,19 +26,19 @@
 }
 
 .dark {
-  --bg: #1a1816;
-  --surface: #232120;
-  --surface-2: #2c2926;
-  --ink: #ece8e1;
-  --ink-soft: #c8c2b4;
-  --muted: #ada599;
-  --border: #36322e;
-  --border-strong: #45403a;
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface-2: #1f1f1f;
+  --ink: #f5f5f5;
+  --ink-soft: #c4c4c4;
+  --muted: #8a8a8a;
+  --border: #262626;
+  --border-strong: #363636;
   --accent: #ec8554;
   --accent-hover: #f0975f;
   --accent-light: #e0743f;
-  --accent-soft: #352a23;
-  --on-accent: #1a1816;
+  --accent-soft: #2a1d15;
+  --on-accent: #0a0a0a;
   --positive: #5bbd80;
   --negative: #e0743f;
   --danger: #e06b62;

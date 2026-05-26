@@ -11,7 +11,6 @@ const ROUTES = [
   "/guidelines",
   "/mental-health",
   "/scholarship",
-  "/volunteer",
   "/search",
   "/forgot-password",
   "/reset-password",

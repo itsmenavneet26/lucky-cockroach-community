@@ -30,6 +30,25 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    // Externalised routes — the volunteer + petition experiences live on
+    // the marketing site, so the in-app routes 308 to luckycockroach.com.
+    // Doing this at the framework level emits a real HTTP redirect before
+    // any rendering, which is faster and avoids the meta-refresh flash you
+    // get from calling redirect() inside a server component.
+    return [
+      {
+        source: "/volunteer",
+        destination: "https://luckycockroach.com/volunteer/",
+        permanent: true,
+      },
+      {
+        source: "/petition",
+        destination: "https://luckycockroach.com/petition/",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     // Content Security Policy — defense-in-depth against XSS (the JSON-LD
     // sink was already patched). Allowing `unsafe-inline` for scripts is a

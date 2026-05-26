@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Sparkles, Users, Target, ArrowRight, LogOut } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
+import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { getProfile, getUser } from "@/lib/auth";
 import { signOut } from "@/lib/actions/auth";
 import { OnboardingForm } from "./onboarding-form";
@@ -80,14 +81,14 @@ export default async function OnboardingPage({
   return (
     <div className="grid min-h-screen lg:grid-cols-[1fr_1.1fr]">
       {/* Left panel — sticky, doesn't scroll with the form */}
-      <aside className="relative hidden overflow-hidden bg-gradient-to-br from-[#f8efe0] via-[#f6e6d2] to-[#f8efe0] lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
+      <aside className="relative hidden overflow-hidden bg-gradient-to-br from-[#f8efe0] via-[#f6e6d2] to-[#f8efe0] dark:from-[#1a1413] dark:via-[#231915] dark:to-[#0d0b0a] lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
         {/* Image at lower portion only */}
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-cover bg-bottom opacity-90"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-cover bg-bottom opacity-90 dark:opacity-40"
           style={{ backgroundImage: "url(/onboarding.png)" }}
         />
-        {/* Soft fade from cream (top) to clear (middle) — keeps text readable */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#f8efe0] via-[#f8efe0]/85 to-transparent" />
+        {/* Soft fade from panel-bg (top) to transparent (middle) — keeps text readable on the image below */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#f8efe0] via-[#f8efe0]/85 to-transparent dark:from-[#1a1413] dark:via-[#1a1413]/85" />
 
         <div className="relative flex h-full flex-col px-10 py-8 xl:px-14 xl:py-10">
           <Link href="/" className="flex items-center gap-2.5">
@@ -159,7 +160,7 @@ export default async function OnboardingPage({
           <StepIndicator />
         </div>
 
-        <div className="mx-auto w-full max-w-xl flex-1 px-6 py-6 sm:px-10">
+        <div className="mx-auto w-full max-w-xl flex-1 px-6 py-6 pb-[calc(64px+env(safe-area-inset-bottom))] sm:px-10 lg:pb-6">
           <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-6 shadow-soft sm:p-8">
             <OnboardingForm
               userId={user.id}
@@ -171,6 +172,7 @@ export default async function OnboardingPage({
           </div>
         </div>
       </div>
+      <MobileBottomNav />
     </div>
   );
 }

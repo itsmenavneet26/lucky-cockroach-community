@@ -27,19 +27,6 @@ const items: { href: string; icon: LucideIcon; label: string; match: (p: string)
 export function MobileBottomNav() {
   const pathname = usePathname() || "/";
 
-  // Hide on routes where a sticky bottom bar gets in the way (auth pages,
-  // the post composer modal target page, admin).
-  if (
-    pathname === "/login" ||
-    pathname === "/signup" ||
-    pathname === "/forgot-password" ||
-    pathname === "/reset-password" ||
-    pathname === "/onboarding" ||
-    pathname.startsWith("/admin")
-  ) {
-    return null;
-  }
-
   return (
     <nav
       aria-label="Mobile navigation"

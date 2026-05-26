@@ -84,14 +84,20 @@ export const metadata: Metadata = {
   category: "community",
 };
 
+// Default everyone to dark mode. Light is opt-in via the theme toggle,
+// which persists "light" or "dark" to localStorage. First-time visitors
+// — including system-light users — get dark. This kills the cream/brown
+// paint that used to show up on luckycockroach.com for visitors who'd
+// never explicitly chosen a theme.
 const themeScript = `
 (function () {
   try {
     var stored = localStorage.getItem("lcc-theme");
-    var dark = stored ? stored === "dark"
-      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var dark = stored ? stored === "dark" : true;
     if (dark) document.documentElement.classList.add("dark");
-  } catch (e) {}
+  } catch (e) {
+    document.documentElement.classList.add("dark");
+  }
 })();
 `;
 

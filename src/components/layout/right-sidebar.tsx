@@ -124,12 +124,14 @@ export async function RightSidebar() {
         <p className="mt-1.5 text-[13px] leading-relaxed text-ink-soft">
           Have time or a skill to give? Join the groundwork behind the movement.
         </p>
-        <Link
-          href="/volunteer"
+        <a
+          href="https://luckycockroach.com/volunteer/"
+          target="_blank"
+          rel="noopener noreferrer"
           className="mt-2 inline-block text-[13px] font-semibold text-accent underline underline-offset-2"
         >
           Become a volunteer →
-        </Link>
+        </a>
       </Card>
     </div>
   );

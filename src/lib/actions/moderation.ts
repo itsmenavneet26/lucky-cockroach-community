@@ -32,6 +32,28 @@ async function requireMod(): Promise<{ id: string; role: UserRole } | null> {
   return null;
 }
 
+async function notifyMod(
+  recipientId: string,
+  actorId: string,
+  action: string,
+  targetType: "post" | "comment" | "user",
+  targetId: string,
+  meta: Record<string, unknown> = {},
+) {
+  if (recipientId === actorId) return;
+  const { error } = await createServiceClient()
+    .from("notifications")
+    .insert({
+      user_id: recipientId,
+      type: "mod_action",
+      actor_id: actorId,
+      target_type: targetType,
+      target_id: targetId,
+      meta: { action, ...meta },
+    });
+  if (error) console.error("[moderation] notifyMod:", action, error.message);
+}
+
 async function audit(
   actorId: string,
   action: string,
@@ -123,18 +145,18 @@ export async function setPostRemoved(
 ): Promise<ActionResult> {
   const mod = await requireMod();
   if (!mod) return forbidden("Only moderators can do that.");
-  const { error } = await createServiceClient()
+  const service = createServiceClient();
+  const { data: row, error } = await service
     .from("posts")
     .update({ is_removed: removed, removed_reason: reason ?? null })
-    .eq("id", postId);
+    .eq("id", postId)
+    .select("author_id")
+    .single();
   if (error) return mapDbError("moderation.setPostRemoved", error);
-  await audit(
-    mod.id,
-    removed ? "post_removed" : "post_restored",
-    "post",
-    postId,
-    { reason },
-  );
+  const action = removed ? "post_removed" : "post_restored";
+  await audit(mod.id, action, "post", postId, { reason });
+  if (row?.author_id)
+    await notifyMod(row.author_id, mod.id, action, "post", postId, { reason });
   revalidatePath(`/post/${postId}`);
   revalidatePath("/admin/reports");
   return ok();
@@ -146,17 +168,17 @@ export async function setPostLocked(
 ): Promise<ActionResult> {
   const mod = await requireMod();
   if (!mod) return forbidden("Only moderators can do that.");
-  const { error } = await createServiceClient()
+  const { data: row, error } = await createServiceClient()
     .from("posts")
     .update({ is_locked: locked })
-    .eq("id", postId);
+    .eq("id", postId)
+    .select("author_id")
+    .single();
   if (error) return mapDbError("moderation.setPostLocked", error);
-  await audit(
-    mod.id,
-    locked ? "post_locked" : "post_unlocked",
-    "post",
-    postId,
-  );
+  const action = locked ? "post_locked" : "post_unlocked";
+  await audit(mod.id, action, "post", postId);
+  if (row?.author_id)
+    await notifyMod(row.author_id, mod.id, action, "post", postId);
   revalidatePath(`/post/${postId}`);
   return ok();
 }
@@ -189,17 +211,17 @@ export async function setCommentRemoved(
 ): Promise<ActionResult> {
   const mod = await requireMod();
   if (!mod) return forbidden("Only moderators can do that.");
-  const { error } = await createServiceClient()
+  const { data: row, error } = await createServiceClient()
     .from("comments")
     .update({ is_removed: removed })
-    .eq("id", commentId);
+    .eq("id", commentId)
+    .select("author_id")
+    .single();
   if (error) return mapDbError("moderation.setCommentRemoved", error);
-  await audit(
-    mod.id,
-    removed ? "comment_removed" : "comment_restored",
-    "comment",
-    commentId,
-  );
+  const action = removed ? "comment_removed" : "comment_restored";
+  await audit(mod.id, action, "comment", commentId);
+  if (row?.author_id)
+    await notifyMod(row.author_id, mod.id, action, "comment", commentId);
   revalidatePath(`/post/${postId}`);
   return ok();
 }
@@ -229,6 +251,10 @@ export async function banUser(
   });
   if (banErr) return mapDbError("moderation.banUser.insert", banErr);
   await audit(mod.id, "user_banned", "user", userId, { reason, days });
+  await notifyMod(userId, mod.id, "user_banned", "user", userId, {
+    reason,
+    days,
+  });
   revalidatePath("/admin");
   return ok();
 }
@@ -245,6 +271,7 @@ export async function unbanUser(userId: string): Promise<ActionResult> {
     .eq("user_id", userId);
   if (banErr) return mapDbError("moderation.unbanUser.delete", banErr);
   await audit(mod.id, "user_unbanned", "user", userId);
+  await notifyMod(userId, mod.id, "user_unbanned", "user", userId);
   revalidatePath("/admin");
   return ok();
 }

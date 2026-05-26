@@ -1,5 +1,6 @@
 import { Users, MapPin, ShieldCheck } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
+import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 
 const stats = [
   { icon: Users, value: "100K", label: "Cockroaches strong" },
@@ -55,12 +56,13 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Right — form panel (theme-aware) */}
-        <main className="flex w-full flex-col bg-surface lg:w-1/2">
+        <main className="flex w-full flex-col bg-surface pb-[calc(64px+env(safe-area-inset-bottom))] lg:w-1/2 lg:pb-0">
           <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-12 sm:px-10">
             {children}
           </div>
         </main>
       </div>
+      <MobileBottomNav />
     </div>
   );
 }
