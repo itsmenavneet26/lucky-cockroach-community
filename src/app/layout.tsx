@@ -22,7 +22,7 @@ const outfit = Outfit({
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-const SITE_NAME = "Lucky Cockroach Community";
+const SITE_NAME = "Lucky Cockroach Awaaz";
 const SITE_DESCRIPTION =
   "A community for India's students and youth — share what you're going through, mental-health support, scholarships, volunteering, and honest peer conversations from people who actually understand.";
 

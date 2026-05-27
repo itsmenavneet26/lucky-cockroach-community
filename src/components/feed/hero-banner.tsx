@@ -17,7 +17,7 @@ export function HeroBanner({ hero }: { hero: HomeHero }) {
           {/* Overlay: in light mode the warm image tones can show through;
               in dark mode we push to near-opaque black on the text side so
               the warm bleed doesn't read as a brown wash. */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0d0b0a]/85 via-[#0d0b0a]/55 to-transparent dark:from-black dark:via-black/80 dark:to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0d0b0a]/75 via-[#0d0b0a]/35 to-transparent dark:from-black/85 dark:via-black/55 dark:to-black/5" />
         </>
       ) : (
         <>

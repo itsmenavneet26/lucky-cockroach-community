@@ -40,7 +40,7 @@ export async function requireAdmin(): Promise<boolean> {
 
 const DEFAULT_SETTINGS: SiteSettings = {
   id: 1,
-  site_name: "Lucky Cockroach Community",
+  site_name: "Lucky Cockroach Awaaz",
   tagline: "Share what you're going through.",
   registration_open: true,
   feature_flags: { polls: true, images: true, links: true },

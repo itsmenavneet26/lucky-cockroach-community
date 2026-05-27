@@ -28,7 +28,7 @@ export async function generateMetadata({
   if (!post) return { title: "Post not found", robots: { index: false } };
   const description =
     (post.body_text || "").slice(0, 160).trim() ||
-    `${post.title} — a discussion in ${post.topic.name} on Lucky Cockroach Community.`;
+    `${post.title} — a discussion in ${post.topic.name} on Lucky Cockroach Awaaz.`;
   const url = `/post/${post.id}`;
   const authorName = post.author.display_name || post.author.username;
   return {

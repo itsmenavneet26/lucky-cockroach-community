@@ -47,7 +47,7 @@ export async function generateMetadata({
   const displayName = profile.display_name || `@${profile.username}`;
   const bio =
     (profile.bio && profile.bio.slice(0, 160)) ||
-    `Profile of ${displayName} on Lucky Cockroach Community — posts, comments, and contributions to India's student and youth community.`;
+    `Profile of ${displayName} on Lucky Cockroach Awaaz — posts, comments, and contributions to India's student and youth community.`;
   const url = `/u/${profile.username}`;
   return {
     title: `${displayName} (@${profile.username})`,

@@ -28,7 +28,7 @@ export async function RightSidebar() {
       {/* Community */}
       <Card>
         <h2 className="flex items-center gap-1.5 text-[16px] font-semibold text-ink">
-          Lucky Cockroach Community
+          Lucky Cockroach Awaaz
           <BadgeCheck size={17} className="text-accent" />
         </h2>
         <p className="mt-1.5 text-[13px] leading-relaxed text-ink-soft">

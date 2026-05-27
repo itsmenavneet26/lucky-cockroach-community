@@ -13,7 +13,7 @@ export default async function AboutPage() {
         </h1>
         <div className="mt-3 flex flex-col gap-3 text-[14px] leading-relaxed text-ink-soft">
           <p>
-            Lucky Cockroach Community is the member space of the Lucky Cockroach
+            Lucky Cockroach Awaaz is the member space of the Lucky Cockroach
             movement — built for India&apos;s students, aspirants, and unemployed
             youth.
           </p>

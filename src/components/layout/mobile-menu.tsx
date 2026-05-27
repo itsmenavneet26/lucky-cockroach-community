@@ -47,7 +47,7 @@ export function MobileMenu({
           <Link
             href="/"
             onClick={() => setOpen(false)}
-            aria-label="Lucky Cockroach Community — home"
+            aria-label="Lucky Cockroach Awaaz — home"
             className="flex shrink-0 items-center gap-2.5"
           >
             <span className="grid h-9 w-9 place-items-center rounded-[var(--radius)] bg-accent text-on-accent">
@@ -55,8 +55,8 @@ export function MobileMenu({
             </span>
             <span className="text-[14px] font-semibold leading-tight tracking-tight text-ink">
               Lucky Cockroach
-              <span className="block text-[11px] font-medium text-muted">
-                Community
+              <span className="block text-[12px] font-semibold text-accent">
+                Awaaz
               </span>
             </span>
           </Link>

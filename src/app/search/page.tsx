@@ -83,7 +83,7 @@ export default async function SearchPage({
           <EmptyState
             icon={SearchIcon}
             title="Search the community"
-            description="Find posts, topics, and people across Lucky Cockroach Community."
+            description="Find posts, topics, and people across Lucky Cockroach Awaaz."
           />
         ) : (
           <>

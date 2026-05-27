@@ -29,7 +29,7 @@ export function PublicSiteHeader({ topics = [] }: { topics?: Topic[] }) {
 
         <Link
           href="/"
-          aria-label="Lucky Cockroach Community — home"
+          aria-label="Lucky Cockroach Awaaz — home"
           className="flex shrink-0 items-center gap-2.5"
         >
           <span className="grid h-10 w-10 place-items-center rounded-[var(--radius-lg)] bg-accent text-on-accent">
@@ -37,8 +37,8 @@ export function PublicSiteHeader({ topics = [] }: { topics?: Topic[] }) {
           </span>
           <span className="min-w-0 text-[14px] font-semibold leading-tight tracking-tight text-ink sm:text-[15px]">
             Lucky Cockroach
-            <span className="block text-[11px] font-medium text-muted sm:text-[12px]">
-              Community
+            <span className="block text-[12px] font-semibold text-accent sm:text-[13px]">
+              Awaaz
             </span>
           </span>
         </Link>

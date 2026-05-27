@@ -22,7 +22,7 @@ export async function generateMetadata({
   if (!topic) return { title: "Topic", robots: { index: false } };
   const description =
     (topic.description && topic.description.slice(0, 160)) ||
-    `Posts and discussions in ${topic.name} on Lucky Cockroach Community — India's student and youth community.`;
+    `Posts and discussions in ${topic.name} on Lucky Cockroach Awaaz — India's student and youth community.`;
   const url = `/t/${topic.slug}`;
   return {
     title: topic.name,
@@ -30,13 +30,13 @@ export async function generateMetadata({
     alternates: { canonical: url },
     openGraph: {
       type: "website",
-      title: `${topic.name} · Lucky Cockroach Community`,
+      title: `${topic.name} · Lucky Cockroach Awaaz`,
       description,
       url,
     },
     twitter: {
       card: "summary_large_image",
-      title: `${topic.name} · Lucky Cockroach Community`,
+      title: `${topic.name} · Lucky Cockroach Awaaz`,
       description,
     },
   };

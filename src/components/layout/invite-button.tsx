@@ -5,7 +5,7 @@ import { Check, Users } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 
 const SHARE_TEXT =
-  "Lucky Cockroach Community — a space for India's students and youth to share what they're going through, and stand with people who understand.";
+  "Lucky Cockroach Awaaz — a space for India's students and youth to share what they're going through, and stand with people who understand.";
 
 export function InviteButton({
   url,
@@ -19,7 +19,7 @@ export function InviteButton({
 
   async function invite() {
     const data = {
-      title: "Lucky Cockroach Community",
+      title: "Lucky Cockroach Awaaz",
       text: SHARE_TEXT,
       url,
     };
@@ -47,7 +47,7 @@ export function InviteButton({
     <button
       type="button"
       onClick={invite}
-      aria-label="Invite friends to Lucky Cockroach Community"
+      aria-label="Invite friends to Lucky Cockroach Awaaz"
       className={className}
     >
       {copied ? <Check size={14} /> : <Users size={14} />}
