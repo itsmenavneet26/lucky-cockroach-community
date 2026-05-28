@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
 import type { HomeHero } from "@/lib/types";
@@ -8,11 +9,15 @@ export function HeroBanner({ hero }: { hero: HomeHero }) {
     <div className="relative overflow-hidden rounded-[var(--radius-xl)] border border-accent/20 shadow-soft">
       {hero.image ? (
         <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          {/* LCP image — next/image gives WebP/AVIF + responsive sizing, and
+              `priority` preloads it so it paints fast above the fold. */}
+          <Image
             src={hero.image}
             alt=""
-            className="absolute inset-0 h-full w-full object-cover"
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, 640px"
+            className="object-cover"
           />
           {/* Overlay: in light mode the warm image tones can show through;
               in dark mode we push to near-opaque black on the text side so
