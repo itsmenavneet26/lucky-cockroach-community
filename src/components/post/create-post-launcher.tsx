@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { PenLine, X, Type, BarChart3, ImageIcon, LinkIcon } from "lucide-react";
+import { PenLine, X, Type, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { SubmitForm } from "@/app/submit/submit-form";
@@ -103,11 +103,11 @@ export function CreatePostButton({
   );
 }
 
+// A post now combines text, image and link freely, so the composer offers
+// just two starting points: a standard post or a poll.
 const TYPES = [
-  { label: "Text", icon: Type },
+  { label: "Post", icon: Type },
   { label: "Poll", icon: BarChart3 },
-  { label: "Image", icon: ImageIcon },
-  { label: "Link", icon: LinkIcon },
 ];
 
 /** Home-feed composer card that opens the post modal. */

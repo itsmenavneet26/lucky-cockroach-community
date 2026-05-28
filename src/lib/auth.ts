@@ -4,19 +4,26 @@ import { createClient } from "@/lib/supabase/server";
 import { fail, unauthenticated, type ActionFailure } from "@/lib/errors";
 import type { Profile } from "@/lib/types";
 
-/** The signed-in user's auth record, or null. Cached per request. */
-export const getUser = cache(async () => {
+/**
+ * The signed-in user's identity, or null. Cached per request.
+ *
+ * Uses `getClaims()` rather than `getUser()`: with the project's asymmetric
+ * (ECC P-256) JWT signing key, the access token is verified locally via
+ * WebCrypto against a cached JWKS — no network round-trip to the Auth server
+ * on every request. `getUser()` always hit GoTrue over the wire, which was
+ * the dominant per-request latency. Only `id` is consumed app-wide.
+ */
+export const getUser = cache(async (): Promise<{ id: string } | null> => {
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getUser();
+  const { data, error } = await supabase.auth.getClaims();
   if (error) {
-    // Expired/invalid sessions surface here as AuthSessionMissingError;
-    // that's expected for signed-out visitors, so don't log it.
     if (error.name !== "AuthSessionMissingError") {
-      console.warn("[auth] getUser:", error.message);
+      console.warn("[auth] getClaims:", error.message);
     }
     return null;
   }
-  return data.user;
+  const sub = data?.claims?.sub;
+  return sub ? { id: sub } : null;
 });
 
 /** The signed-in user's profile row, or null. Cached per request. */

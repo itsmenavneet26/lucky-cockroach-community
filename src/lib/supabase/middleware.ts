@@ -81,15 +81,15 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  // Local JWT verification (asymmetric ECC key) — no GoTrue round-trip per
+  // request. WebCrypto is available in the edge runtime; the JWKS is cached.
+  const { data: claims, error } = await supabase.auth.getClaims();
+  const user = claims?.claims?.sub ? { id: claims.claims.sub } : null;
 
   // Auth errors here are usually expired/invalid sessions — Supabase will
   // already have cleared the cookies via setAll above. Treat as signed-out.
   if (error && process.env.NODE_ENV !== "production") {
-    console.warn("[middleware] getUser error:", error.message);
+    console.warn("[middleware] getClaims error:", error.message);
   }
 
   const needsAuth = PROTECTED.some(

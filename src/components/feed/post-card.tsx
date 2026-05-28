@@ -73,11 +73,12 @@ export function PostCard({
 
         <Link href={`/post/${post.id}`} className="group mt-2 block">
           <h2 className="flex items-start gap-1.5 text-[17px] font-semibold leading-snug tracking-tight text-ink group-hover:text-accent">
-            {post.post_type === "link" && (
-              <LinkIcon size={15} className="mt-1 shrink-0 text-muted" />
-            )}
-            {post.post_type === "poll" && (
+            {post.post_type === "poll" ? (
               <BarChart3 size={15} className="mt-1 shrink-0 text-muted" />
+            ) : (
+              post.link_url && (
+                <LinkIcon size={15} className="mt-1 shrink-0 text-muted" />
+              )
             )}
             {post.title}
           </h2>
@@ -86,7 +87,7 @@ export function PostCard({
               {excerpt}
             </p>
           )}
-          {post.post_type === "image" && post.image_url && (
+          {post.image_url && (
             <div className="relative mt-2 aspect-[16/10] w-full overflow-hidden rounded-[var(--radius)] border border-border">
               <Image
                 src={post.image_url}
@@ -97,7 +98,7 @@ export function PostCard({
               />
             </div>
           )}
-          {post.post_type === "link" && post.link_url && (
+          {post.link_url && (
             <span className="mt-1 block truncate text-[13px] text-accent">
               {post.link_url}
             </span>

@@ -18,6 +18,13 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { after } from "next/server";
 import { timeAgo } from "@/lib/utils";
 
+/** A Tiptap doc is "rich" only if it actually holds content nodes. Older
+ *  image/link/poll posts stored plain text in body_text with an empty body. */
+function hasRichBody(body: unknown): boolean {
+  const content = (body as JSONContent | null)?.content;
+  return Array.isArray(content) && content.length > 0;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -185,13 +192,18 @@ export default async function PostPage({
                 {post.title}
               </h1>
 
-              {post.post_type === "text" && (
-                <div className="mt-3 text-[15px] text-ink">
-                  <RichText content={(post.body as JSONContent) ?? {}} />
-                </div>
-              )}
+              {/* Body, image, link and poll all render by presence, so a
+                  single post can combine any of them. */}
+              {post.body_text?.trim() &&
+                (hasRichBody(post.body) ? (
+                  <div className="mt-3 text-[15px] text-ink">
+                    <RichText content={(post.body as JSONContent) ?? {}} />
+                  </div>
+                ) : (
+                  <p className="mt-3 text-[15px] text-ink">{post.body_text}</p>
+                ))}
 
-              {post.post_type === "image" && post.image_url && (
+              {post.image_url && (
                 <div className="mt-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -199,15 +211,10 @@ export default async function PostPage({
                     alt={post.title}
                     className="w-full rounded-[var(--radius)] border border-border object-contain"
                   />
-                  {post.body_text && (
-                    <p className="mt-2 text-[14px] text-ink-soft">
-                      {post.body_text}
-                    </p>
-                  )}
                 </div>
               )}
 
-              {post.post_type === "link" && post.link_url && (
+              {post.link_url && (
                 <a
                   href={post.link_url}
                   target="_blank"
@@ -220,17 +227,12 @@ export default async function PostPage({
               )}
 
               {post.post_type === "poll" && poll && (
-                <>
-                  {post.body_text && (
-                    <p className="mt-3 text-[15px] text-ink">{post.body_text}</p>
-                  )}
-                  <PollDisplay
-                    postId={post.id}
-                    options={poll.options}
-                    viewerOptionId={poll.viewerOptionId}
-                    signedIn={!!profile}
-                  />
-                </>
+                <PollDisplay
+                  postId={post.id}
+                  options={poll.options}
+                  viewerOptionId={poll.viewerOptionId}
+                  signedIn={!!profile}
+                />
               )}
 
               {post.tags.length > 0 && (

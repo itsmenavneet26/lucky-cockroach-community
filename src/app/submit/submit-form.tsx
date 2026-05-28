@@ -7,7 +7,6 @@ import {
   Type,
   BarChart3,
   ImageIcon,
-  LinkIcon,
   X,
   Plus,
   Loader2,
@@ -31,10 +30,13 @@ import { createClient } from "@/lib/supabase/client";
 import { cn, slugify } from "@/lib/utils";
 import type { Topic, PostType } from "@/lib/types";
 
-const TYPES: { key: PostType; label: string; icon: typeof Type }[] = [
-  { key: "text", label: "Text", icon: Type },
-  { key: "image", label: "Image", icon: ImageIcon },
-  { key: "link", label: "Link", icon: LinkIcon },
+// A post is either a standard post (text + image + link, any combination) or
+// a poll (which can also carry text + image + link, plus its options). These
+// are the only two modes the composer offers; the older text/image/link split
+// is preserved in the DB enum only for back-compat with existing rows.
+type PostMode = "text" | "poll";
+const MODES: { key: PostMode; label: string; icon: typeof Type }[] = [
+  { key: "text", label: "Post", icon: Type },
   { key: "poll", label: "Poll", icon: BarChart3 },
 ];
 
@@ -54,7 +56,15 @@ export function SubmitForm({
     createPost,
     {},
   );
-  const [type, setType] = useState<PostType>(defaultType);
+  const [type, setType] = useState<PostMode>(
+    defaultType === "poll" ? "poll" : "text",
+  );
+  // React 19 auto-resets a form after its action resolves (including on a
+  // validation error), which wipes any *uncontrolled* input. Keep every field
+  // in state so the user's input survives a failed submit.
+  const [topicId, setTopicId] = useState("");
+  const [title, setTitle] = useState("");
+  const [linkUrl, setLinkUrl] = useState("");
   const [bodyJson, setBodyJson] = useState<JSONContent>({});
   const [bodyText, setBodyText] = useState("");
   const [imageUrl, setImageUrl] = useState("");
@@ -116,7 +126,7 @@ export function SubmitForm({
 
       {/* Type picker */}
       <div className="flex gap-1.5 rounded-[var(--radius-lg)] border border-border bg-surface p-1.5">
-        {TYPES.map(({ key, label, icon: Icon }) => (
+        {MODES.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             type="button"
@@ -136,7 +146,13 @@ export function SubmitForm({
 
       {/* Topic */}
       <Field label="Topic">
-        <select name="topicId" required defaultValue="" className={inputCls}>
+        <select
+          name="topicId"
+          required
+          value={topicId}
+          onChange={(e) => setTopicId(e.target.value)}
+          className={inputCls}
+        >
           <option value="" disabled>
             Choose a topic…
           </option>
@@ -154,6 +170,8 @@ export function SubmitForm({
           name="title"
           required
           maxLength={300}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
           className={inputCls}
           placeholder={
             type === "poll"
@@ -163,74 +181,7 @@ export function SubmitForm({
         />
       </Field>
 
-      {/* Type-specific body */}
-      {type === "text" && (
-        <Field label="Your story">
-          <RichTextEditor
-            onChange={(json, text) => {
-              setBodyJson(json);
-              setBodyText(text);
-            }}
-          />
-        </Field>
-      )}
-
-      {type === "image" && (
-        <Field label="Image">
-          {imageUrl ? (
-            <div className="relative">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={imageUrl}
-                alt="Upload preview"
-                className="max-h-80 w-full rounded-[var(--radius)] border border-border object-cover"
-              />
-              <button
-                type="button"
-                onClick={() => setImageUrl("")}
-                className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/60 text-white"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          ) : (
-            <label className="flex h-40 cursor-pointer flex-col items-center justify-center gap-2 rounded-[var(--radius)] border border-dashed border-border-strong bg-surface-2 text-sm text-muted hover:border-accent">
-              {uploading ? (
-                <Loader2 size={22} className="animate-spin" />
-              ) : (
-                <>
-                  <ImageIcon size={22} />
-                  <span>Click to upload an image (max 5MB)</span>
-                </>
-              )}
-              <input
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/gif"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) uploadImage(f);
-                }}
-              />
-            </label>
-          )}
-          {uploadError && (
-            <p className="mt-1 text-[12px] text-danger">{uploadError}</p>
-          )}
-        </Field>
-      )}
-
-      {type === "link" && (
-        <Field label="Link URL">
-          <input
-            name="linkUrl"
-            type="url"
-            className={inputCls}
-            placeholder="https://…"
-          />
-        </Field>
-      )}
-
+      {/* Poll options — only for polls, shown right under the question. */}
       {type === "poll" && (
         <Field label="Poll options">
           <div className="flex flex-col gap-2">
@@ -273,6 +224,70 @@ export function SubmitForm({
           </div>
         </Field>
       )}
+
+      {/* Body, image, and link are all optional and can be combined freely. */}
+      <Field label={type === "poll" ? "Add context (optional)" : "Your story"}>
+        <RichTextEditor
+          onChange={(json, text) => {
+            setBodyJson(json);
+            setBodyText(text);
+          }}
+        />
+      </Field>
+
+      <Field label="Image (optional)">
+        {imageUrl ? (
+            <div className="relative">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={imageUrl}
+                alt="Upload preview"
+                className="max-h-80 w-full rounded-[var(--radius)] border border-border object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => setImageUrl("")}
+                className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/60 text-white"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          ) : (
+            <label className="flex h-40 cursor-pointer flex-col items-center justify-center gap-2 rounded-[var(--radius)] border border-dashed border-border-strong bg-surface-2 text-sm text-muted hover:border-accent">
+              {uploading ? (
+                <Loader2 size={22} className="animate-spin" />
+              ) : (
+                <>
+                  <ImageIcon size={22} />
+                  <span>Click to upload an image (max 5MB)</span>
+                </>
+              )}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) uploadImage(f);
+                }}
+              />
+            </label>
+          )}
+          {uploadError && (
+            <p className="mt-1 text-[12px] text-danger">{uploadError}</p>
+          )}
+      </Field>
+
+      <Field label="Link (optional)">
+        <input
+          name="linkUrl"
+          type="url"
+          value={linkUrl}
+          onChange={(e) => setLinkUrl(e.target.value)}
+          className={inputCls}
+          placeholder="https://…"
+        />
+      </Field>
 
       {/* Tags */}
       <Field label="Tags (optional)">

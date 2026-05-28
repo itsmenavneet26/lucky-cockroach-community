@@ -33,14 +33,20 @@ const schema = z
     pollOptions: z.array(z.string().trim().min(1)).default([]),
   })
   .superRefine((v, ctx) => {
-    if (v.postType === "link" && !v.linkUrl)
-      ctx.addIssue({ code: "custom", message: "A link post needs a URL.", path: ["linkUrl"] });
-    if (v.postType === "image" && !v.imageUrl)
-      ctx.addIssue({ code: "custom", message: "Please upload an image.", path: ["imageUrl"] });
-    if (v.postType === "poll" && v.pollOptions.filter(Boolean).length < 2)
-      ctx.addIssue({ code: "custom", message: "A poll needs at least two options.", path: ["pollOptions"] });
-    if (v.postType === "text" && v.bodyText.trim().length < 10)
-      ctx.addIssue({ code: "custom", message: "Please write at least a sentence.", path: ["body"] });
+    // A post can freely combine text + image + link. The only hard rule is
+    // that a non-poll post must carry at least one of the three.
+    if (v.postType === "poll") {
+      if (v.pollOptions.filter(Boolean).length < 2)
+        ctx.addIssue({ code: "custom", message: "A poll needs at least two options.", path: ["pollOptions"] });
+    } else {
+      const hasText = v.bodyText.trim().length > 0;
+      if (!hasText && !v.imageUrl && !v.linkUrl)
+        ctx.addIssue({
+          code: "custom",
+          message: "Add some text, an image, or a link.",
+          path: ["body"],
+        });
+    }
   });
 
 export type CreatePostState = {
